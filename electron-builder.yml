@@ -1,0 +1,77 @@
+appId: com.plurse.desktop
+productName: plurse-desktop
+directories:
+  buildResources: build
+files:
+  - '!**/.vscode/*'
+  - '!src/*'
+  - '!electron.vite.config.{js,ts,mjs,cjs}'
+  - '!{.eslintcache,eslint.config.mjs,.prettierignore,.prettierrc.yaml,dev-app-update.yml,CHANGELOG.md,README.md}'
+  - '!{.env,.env.*,.npmrc,pnpm-lock.yaml}'
+  - '!{tsconfig.json,tsconfig.node.json,tsconfig.web.json}'
+asarUnpack:
+  - resources/**
+
+# Windows configuration
+win:
+  executableName: plurse-desktop
+  icon: build/icons/win/icon.ico
+  target:
+    - nsis
+    - portable
+
+nsis:
+  artifactName: ${name}-${version}-setup.${ext}
+  shortcutName: ${productName}
+  uninstallDisplayName: ${productName}
+  createDesktopShortcut: always
+  installerIcon: build/icons/win/icon.ico
+  uninstallerIcon: build/icons/win/icon.ico
+
+# macOS configuration
+mac:
+  icon: build/icons/mac/icon.icns
+  entitlementsInherit: build/entitlements.mac.plist
+  extendInfo:
+    - NSCameraUsageDescription: Application requests access to the device's camera.
+    - NSMicrophoneUsageDescription: Application requests access to the device's microphone.
+    - NSDocumentsFolderUsageDescription: Application requests access to the user's Documents folder.
+    - NSDownloadsFolderUsageDescription: Application requests access to the user's Downloads folder.
+  notarize: false
+  target:
+    - dmg
+    - zip
+
+dmg:
+  artifactName: ${name}-${version}.${ext}
+  icon: build/icons/mac/icon.icns
+  contents:
+    - x: 130
+      y: 220
+    - x: 410
+      y: 220
+      type: link
+      path: /Applications
+
+# Linux configuration
+linux:
+  icon: build/icons/png/
+  target:
+    - AppImage
+    - snap
+    - deb
+  maintainer: plurse.com
+  category: Utility
+  desktop:
+    entry:
+      Name: plurse-desktop
+      Comment: Plurse Desktop Application
+      Categories: Utility;
+
+appImage:
+  artifactName: ${name}-${version}.${ext}
+
+npmRebuild: false
+# publish:
+#   provider: generic
+#   url: https://example.com/auto-updates

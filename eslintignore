@@ -1,0 +1,27 @@
+# Ignore node modules
+
+node_modules/
+
+# Ignore build outputs
+
+dist/
+build/
+out/
+
+# Ignore Electron packaged binaries
+
+release/
+
+# Ignore VS Code settings or local configs
+
+.vscode/
+\*.config.js
+
+# Ignore generated files (e.g., TypeScript compiled JS)
+
+_.js
+_.d.ts
+
+# Ignore logs
+
+\*.log
