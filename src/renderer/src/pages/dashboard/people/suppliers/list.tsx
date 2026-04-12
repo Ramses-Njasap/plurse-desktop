@@ -1,3 +1,4 @@
+import ReactDOM from 'react-dom'
 import ToastContainer, { ToastMessage } from '@renderer/components/toast/toast-container'
 import { useCallback, useEffect, useRef, useState } from 'react'
 
@@ -24,47 +25,35 @@ type Supplier = {
 }
 
 type Pagination = {
-  page: number
-  limit: number
-  total: number
-  total_pages: number
-  has_next: boolean
-  has_prev: boolean
-  returned: number
+  page: number; limit: number; total: number; total_pages: number
+  has_next: boolean; has_prev: boolean; returned: number
 }
 
 type SortKey = 'name_asc' | 'name_desc' | 'date_asc' | 'date_desc' | 'purchases_asc' | 'purchases_desc'
 type TabKey = 'active' | 'deleted'
 
 type SupplierFormData = {
-  supplier_name: string
-  contact_person: string
-  phone_number: string
-  email: string
-  address: string
-  is_active: boolean
+  supplier_name: string; contact_person: string; phone_number: string
+  email: string; address: string; is_active: boolean
 }
 
 type SupplierModalMode = 'create' | 'edit'
 
-const LIMIT = 20
+const LIMIT = 50
 
 const sortLabels: Record<SortKey, string> = {
-  name_asc: 'A → Z',
-  name_desc: 'Z → A',
-  date_asc: 'Oldest first',
-  date_desc: 'Newest first',
-  purchases_asc: 'Fewest purchases',
-  purchases_desc: 'Most purchases',
+  name_asc: 'A → Z', name_desc: 'Z → A',
+  date_asc: 'Oldest first', date_desc: 'Newest first',
+  purchases_asc: 'Fewest purchases', purchases_desc: 'Most purchases',
 }
 
 const sortToApiParams = (key: SortKey): { sort_by: string; sort_order: 'asc' | 'desc' } => {
   switch (key) {
-    case 'name_asc':       return { sort_by: 'supplier_name', sort_order: 'asc' }
-    case 'name_desc':      return { sort_by: 'supplier_name', sort_order: 'desc' }
-    case 'date_asc':       return { sort_by: 'created_on', sort_order: 'asc' }
-    case 'date_desc':      return { sort_by: 'created_on', sort_order: 'desc' }
-    case 'purchases_asc':  return { sort_by: 'created_on', sort_order: 'asc' }
+    case 'name_asc': return { sort_by: 'supplier_name', sort_order: 'asc' }
+    case 'name_desc': return { sort_by: 'supplier_name', sort_order: 'desc' }
+    case 'date_asc': return { sort_by: 'created_on', sort_order: 'asc' }
+    case 'date_desc': return { sort_by: 'created_on', sort_order: 'desc' }
+    case 'purchases_asc': return { sort_by: 'created_on', sort_order: 'asc' }
     case 'purchases_desc': return { sort_by: 'created_on', sort_order: 'desc' }
   }
 }
@@ -83,30 +72,32 @@ const formatCurrency = (val: number | null | undefined) => {
 
 const formatPercent = (val: number | null | undefined) => {
   if (val == null) return '—'
-  return `${(val * 100).toFixed(1)}%`
+  return `${(val).toFixed(1)}%`
 }
 
 // ─── Supplier Avatar ──────────────────────────────────────────────────────────
 
-const orangeGradients = [
-  'from-orange-400 to-orange-600',
-  'from-amber-400 to-orange-500',
-  'from-orange-500 to-red-500',
-  'from-yellow-400 to-orange-500',
-  'from-orange-300 to-amber-600',
-  'from-red-400 to-orange-500',
-  'from-amber-500 to-yellow-600',
-  'from-orange-400 to-amber-600',
-  'from-orange-500 to-orange-700',
-  'from-amber-400 to-amber-600',
+const blueGradients = [
+  'from-blue-400 to-blue-600',
+  'from-blue-500 to-indigo-600',
+  'from-indigo-400 to-blue-600',
+  'from-blue-400 to-cyan-600',
+  'from-sky-400 to-blue-600',
+  'from-blue-500 to-blue-700',
+  'from-indigo-500 to-blue-600',
+  'from-blue-400 to-indigo-500',
+  'from-cyan-500 to-blue-600',
+  'from-blue-600 to-indigo-600',
 ]
 
 const getSupplierGradient = (name: string) => {
-  const idx = (name.charCodeAt(0) + (name.charCodeAt(1) || 0)) % orangeGradients.length
-  return orangeGradients[idx]
+  const idx = (name.charCodeAt(0) + (name.charCodeAt(1) || 0)) % blueGradients.length
+  return blueGradients[idx]
 }
 
-const SupplierAvatar = ({ name, size = 'md', isDeleted }: { name: string; size?: 'sm' | 'md' | 'lg'; isDeleted?: boolean }) => {
+const SupplierAvatar = ({ name, size = 'md', isDeleted }: {
+  name: string; size?: 'sm' | 'md' | 'lg'; isDeleted?: boolean
+}) => {
   const sizeMap = { sm: 'w-8 h-8 text-xs', md: 'w-10 h-10 text-sm', lg: 'w-12 h-12 text-base' }
   const gradient = isDeleted ? 'from-gray-300 to-gray-400' : getSupplierGradient(name)
   const initial = (name || '?').charAt(0).toUpperCase()
@@ -139,7 +130,7 @@ const SupplierSkeleton = () => (
           <div className="h-3 bg-gray-100 rounded w-1/2" />
         </div>
         <div className="hidden lg:block lg:col-span-2">
-          <div className="h-6 bg-orange-100 rounded-full w-24" />
+          <div className="h-6 bg-blue-100 rounded-full w-24" />
         </div>
         <div className="hidden lg:block lg:col-span-2">
           <div className="h-6 bg-gray-100 rounded-full w-20" />
@@ -152,24 +143,17 @@ const SupplierSkeleton = () => (
   </div>
 )
 
-// ─── Supplier Modal (Create/Edit) ─────────────────────────────────────────────
+// ─── Supplier Modal (Create/Edit) — offcanvas ─────────────────────────────────
 
 type SupplierModalProps = {
-  open: boolean
-  mode: SupplierModalMode
-  initialData?: Partial<SupplierFormData>
-  supplierId?: number
-  onClose: () => void
-  onSuccess: (message: string) => void
+  open: boolean; mode: SupplierModalMode
+  initialData?: Partial<SupplierFormData>; supplierId?: number
+  onClose: () => void; onSuccess: (message: string) => void
 }
 
 const defaultForm = (): SupplierFormData => ({
-  supplier_name: '',
-  contact_person: '',
-  phone_number: '',
-  email: '',
-  address: '',
-  is_active: true,
+  supplier_name: '', contact_person: '', phone_number: '',
+  email: '', address: '', is_active: true,
 })
 
 const SupplierModal = ({ open, mode, initialData, supplierId, onClose, onSuccess }: SupplierModalProps) => {
@@ -184,7 +168,17 @@ const SupplierModal = ({ open, mode, initialData, supplierId, onClose, onSuccess
     }
   }, [open, initialData])
 
-  if (!open) return null
+  useEffect(() => {
+    document.body.style.overflow = open ? 'hidden' : ''
+    return () => { document.body.style.overflow = '' }
+  }, [open])
+
+  useEffect(() => {
+    if (!open) return
+    const h = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose() }
+    window.addEventListener('keydown', h)
+    return () => window.removeEventListener('keydown', h)
+  }, [open, onClose])
 
   const set = (patch: Partial<SupplierFormData>) => setForm(f => ({ ...f, ...patch }))
   const clearErr = (k: string) => setErrors(e => { const n = { ...e }; delete n[k]; return n })
@@ -232,105 +226,115 @@ const SupplierModal = ({ open, mode, initialData, supplierId, onClose, onSuccess
     }
   }
 
-  return (
-    <div
-      className="fixed top-0 left-64 right-0 bottom-0 z-50 flex items-center justify-center p-4"
-      style={{ animation: 'fadeIn 0.15s ease-out' }}
-    >
-      <div className="absolute inset-0 bg-black/30 backdrop-blur-sm" onClick={onClose} />
+  return ReactDOM.createPortal(
+    <>
+      {/* Backdrop */}
       <div
-        className="relative bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden"
-        style={{ animation: 'scaleIn 0.15s ease-out' }}
-        onClick={e => e.stopPropagation()}
+        className={`fixed inset-0 z-[9998] bg-black/25 backdrop-blur-sm transition-opacity duration-300 ${open ? 'opacity-100' : 'opacity-0 pointer-events-none'
+          }`}
+        onClick={onClose}
+      />
+
+      {/* Offcanvas panel */}
+      <div
+        className={`fixed top-0 right-0 z-[9999] h-full bg-white shadow-2xl flex flex-col transition-transform duration-300 ease-out overflow-x-hidden ${open ? 'translate-x-0' : 'translate-x-full'
+          }`}
+        style={{ width: 'min(440px, 100vw)' }}
       >
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100 bg-gradient-to-r from-orange-50 to-white">
+        <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100 bg-gradient-to-r from-gray-50 to-white flex-shrink-0">
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 bg-gradient-to-br from-orange-500 to-orange-600 rounded-xl flex items-center justify-center shadow-sm">
+            <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center shadow-sm">
               <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
               </svg>
             </div>
-            <h2 className="text-sm font-bold text-gray-900">{mode === 'create' ? 'New Supplier' : 'Edit Supplier'}</h2>
+            <div>
+              <h2 className="text-sm font-bold text-gray-900">
+                {mode === 'create' ? 'New Supplier' : 'Edit Supplier'}
+              </h2>
+              {mode === 'edit' && supplierId && (
+                <p className="text-xs text-gray-500">ID #{String(supplierId).padStart(4, '0')}</p>
+              )}
+            </div>
           </div>
-          <button onClick={onClose} className="w-7 h-7 rounded-full flex items-center justify-center text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition-all">
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+          <button
+            onClick={onClose}
+            className="w-8 h-8 rounded-full flex items-center justify-center text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition-all"
+          >
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
           </button>
         </div>
 
-        {/* Body */}
-        <div className="px-6 py-5 space-y-4 max-h-[70vh] overflow-y-auto">
+        {/* Scrollable body */}
+        <div className="flex-1 overflow-y-auto overflow-x-hidden px-5 py-5 space-y-5">
           {errors.submit && (
             <div className="flex items-center gap-2 px-3 py-2.5 bg-red-50 rounded-lg border border-red-200">
-              <svg className="w-4 h-4 text-red-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+              <svg className="w-4 h-4 text-red-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
               <p className="text-xs text-red-700 font-medium">{errors.submit}</p>
             </div>
           )}
 
-          {/* Supplier Name */}
           <div>
             <label className="block text-sm font-semibold text-gray-700 mb-1.5">
               Supplier Name <span className="text-red-500">*</span>
             </label>
             <input
-              type="text"
-              value={form.supplier_name}
+              type="text" value={form.supplier_name}
               onChange={e => { set({ supplier_name: e.target.value }); clearErr('supplier_name') }}
               placeholder="e.g. Acme Supplies Ltd."
-              className={`w-full px-4 py-3 rounded-lg border text-sm focus:outline-none focus:ring-2 transition-all ${errors.supplier_name ? 'border-red-300 focus:ring-red-400 bg-red-50' : 'border-gray-300 focus:ring-orange-500 bg-white'}`}
+              className={`w-full px-4 py-3 rounded-lg border text-sm focus:outline-none focus:ring-2 transition-all ${errors.supplier_name ? 'border-red-300 focus:ring-red-400 bg-red-50' : 'border-gray-300 focus:ring-blue-500 bg-white'
+                }`}
             />
             {errors.supplier_name && <p className="text-xs text-red-600 mt-1">{errors.supplier_name}</p>}
           </div>
 
-          {/* Contact Person */}
           <div>
             <label className="block text-sm font-semibold text-gray-700 mb-1.5">Contact Person</label>
             <input
-              type="text"
-              value={form.contact_person}
+              type="text" value={form.contact_person}
               onChange={e => set({ contact_person: e.target.value })}
               placeholder="e.g. Jane Smith"
-              className="w-full px-4 py-3 rounded-lg border border-gray-300 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500 bg-white transition-all"
+              className="w-full px-4 py-3 rounded-lg border border-gray-300 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white transition-all"
             />
           </div>
 
-          {/* Phone + Email */}
           <div className="grid grid-cols-2 gap-3">
             <div>
               <label className="block text-sm font-semibold text-gray-700 mb-1.5">Phone</label>
               <input
-                type="text"
-                value={form.phone_number}
+                type="text" value={form.phone_number}
                 onChange={e => set({ phone_number: e.target.value })}
                 placeholder="+1 234 567 8900"
-                className="w-full px-4 py-3 rounded-lg border border-gray-300 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500 bg-white transition-all"
+                className="w-full px-4 py-3 rounded-lg border border-gray-300 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white transition-all"
               />
             </div>
             <div>
               <label className="block text-sm font-semibold text-gray-700 mb-1.5">Email</label>
               <input
-                type="email"
-                value={form.email}
+                type="email" value={form.email}
                 onChange={e => set({ email: e.target.value })}
                 placeholder="supplier@co.com"
-                className="w-full px-4 py-3 rounded-lg border border-gray-300 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500 bg-white transition-all"
+                className="w-full px-4 py-3 rounded-lg border border-gray-300 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white transition-all"
               />
             </div>
           </div>
 
-          {/* Address */}
           <div>
             <label className="block text-sm font-semibold text-gray-700 mb-1.5">Address</label>
             <textarea
               value={form.address}
               onChange={e => set({ address: e.target.value })}
               placeholder="123 Industrial Ave, City, Country"
-              rows={2}
-              className="w-full px-4 py-3 rounded-lg border border-gray-300 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500 bg-white resize-none transition-all"
+              rows={3}
+              className="w-full px-4 py-3 rounded-lg border border-gray-300 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white resize-none transition-all"
             />
           </div>
 
-          {/* Active toggle */}
           <div className="flex items-center justify-between py-3 px-4 bg-gray-50 rounded-lg border border-gray-200">
             <div>
               <p className="text-sm font-semibold text-gray-700">Active</p>
@@ -339,44 +343,53 @@ const SupplierModal = ({ open, mode, initialData, supplierId, onClose, onSuccess
             <button
               type="button"
               onClick={() => set({ is_active: !form.is_active })}
-              className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 ${form.is_active ? 'bg-orange-600' : 'bg-gray-300'}`}
+              className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 ${form.is_active ? 'bg-blue-600' : 'bg-gray-300'
+                }`}
             >
               <span className={`inline-block h-4 w-4 rounded-full bg-white shadow-sm transform transition-transform duration-200 ${form.is_active ? 'translate-x-6' : 'translate-x-1'}`} />
             </button>
           </div>
+
+          <div className="h-2" />
         </div>
 
         {/* Footer */}
-        <div className="flex items-center justify-end gap-3 px-6 py-4 border-t border-gray-100 bg-gray-50/50">
-          <button onClick={onClose} className="px-4 py-2 text-sm font-semibold text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-lg transition-colors">Cancel</button>
+        <div className="flex items-center justify-end gap-3 px-5 py-4 border-t border-gray-100 bg-gray-50/50 flex-shrink-0">
           <button
-            onClick={handleSubmit}
-            disabled={submitting}
-            className="px-5 py-2 bg-gradient-to-r from-orange-600 to-orange-500 hover:from-orange-700 hover:to-orange-600 disabled:opacity-50 disabled:cursor-not-allowed text-white text-sm font-semibold rounded-lg transition-all shadow-md hover:shadow-lg flex items-center gap-2"
+            onClick={onClose}
+            className="px-4 py-2 text-sm font-semibold text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-lg transition-colors"
+          >
+            Cancel
+          </button>
+          <button
+            onClick={handleSubmit} disabled={submitting}
+            className="px-5 py-2 bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 disabled:opacity-50 disabled:cursor-not-allowed text-white text-sm font-semibold rounded-lg transition-all shadow-md hover:shadow-lg flex items-center gap-2"
           >
             {submitting ? (
               <>
-                <svg className="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" /><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" /></svg>
+                <svg className="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                </svg>
                 Saving…
               </>
             ) : (
               <>
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                </svg>
                 {mode === 'create' ? 'Add Supplier' : 'Save Changes'}
               </>
             )}
           </button>
         </div>
       </div>
-      <style>{`
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-        @keyframes scaleIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
-      `}</style>
-    </div>
+    </>,
+    document.body
   )
 }
 
-// ─── Supplier Action Modal ────────────────────────────────────────────────────
+// ─── Supplier Action Modal — portaled centered confirm ────────────────────────
 
 type SupplierActionModalProps = {
   mode: 'delete' | 'restore'
@@ -387,18 +400,20 @@ type SupplierActionModalProps = {
 
 const SupplierActionModal = ({ mode, supplier, onConfirm, onCancel }: SupplierActionModalProps) => {
   const isDelete = mode === 'delete'
-  return (
+
+  return ReactDOM.createPortal(
     <div
-      className="fixed top-0 left-64 right-0 bottom-0 z-50 flex items-center justify-center p-4 bg-black/30 backdrop-blur-sm"
+      className="fixed inset-0 z-[9999] flex items-center justify-center p-4"
       style={{ animation: 'fadeIn 0.15s ease-out' }}
       onClick={onCancel}
     >
+      <div className="absolute inset-0 bg-black/30 backdrop-blur-sm" />
       <div
-        className="bg-white rounded-2xl shadow-2xl max-w-sm w-full overflow-hidden"
+        className="relative bg-white rounded-2xl shadow-2xl max-w-sm w-full overflow-hidden z-10"
         style={{ animation: 'scaleIn 0.15s ease-out' }}
         onClick={e => e.stopPropagation()}
       >
-        <div className={`px-6 pt-6 pb-4 ${isDelete ? 'bg-gradient-to-br from-red-50 to-red-100/40' : 'bg-gradient-to-br from-orange-50 to-orange-100/40'}`}>
+        <div className={`px-6 pt-6 pb-4 ${isDelete ? 'bg-gradient-to-br from-red-50 to-red-100/40' : 'bg-gradient-to-br from-blue-50 to-blue-100/40'}`}>
           <div className="flex items-start gap-4">
             <SupplierAvatar name={supplier.supplier_name} size="lg" isDeleted={!isDelete} />
             <div className="flex-1 min-w-0">
@@ -406,7 +421,9 @@ const SupplierActionModal = ({ mode, supplier, onConfirm, onCancel }: SupplierAc
               {supplier.purchase_count !== undefined && (
                 <div className="flex items-center gap-1.5 mt-1">
                   <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-white/80 text-gray-700 border border-gray-200">
-                    <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" /></svg>
+                    <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+                    </svg>
                     {supplier.purchase_count} stock purchases
                   </span>
                 </div>
@@ -414,17 +431,24 @@ const SupplierActionModal = ({ mode, supplier, onConfirm, onCancel }: SupplierAc
             </div>
           </div>
         </div>
+
         <div className="px-6 py-5">
           <div className="flex items-start gap-3 mb-4">
-            <div className={`w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 ${isDelete ? 'bg-red-100' : 'bg-orange-100'}`}>
+            <div className={`w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 ${isDelete ? 'bg-red-100' : 'bg-blue-100'}`}>
               {isDelete ? (
-                <svg className="w-5 h-5 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                <svg className="w-5 h-5 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                </svg>
               ) : (
-                <svg className="w-5 h-5 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>
+                <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                </svg>
               )}
             </div>
             <div>
-              <h4 className="text-sm font-semibold text-gray-900 mb-0.5">{isDelete ? 'Delete Supplier?' : 'Restore Supplier?'}</h4>
+              <h4 className="text-sm font-semibold text-gray-900 mb-0.5">
+                {isDelete ? 'Delete Supplier?' : 'Restore Supplier?'}
+              </h4>
               <p className="text-sm text-gray-600 leading-relaxed">
                 {isDelete
                   ? 'The supplier will be soft-deleted. All stock purchase history linked to this supplier remains intact.'
@@ -432,24 +456,48 @@ const SupplierActionModal = ({ mode, supplier, onConfirm, onCancel }: SupplierAc
               </p>
             </div>
           </div>
-          <div className={`rounded-lg p-3 mb-5 border ${isDelete ? 'bg-amber-50 border-amber-200' : 'bg-orange-50 border-orange-200'}`}>
+
+          <div className={`rounded-lg p-3 mb-5 border ${isDelete ? 'bg-amber-50 border-amber-200' : 'bg-blue-50 border-blue-200'}`}>
             <div className="flex gap-2">
-              <svg className={`w-4 h-4 flex-shrink-0 mt-0.5 ${isDelete ? 'text-amber-600' : 'text-orange-600'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-              <p className={`text-xs leading-relaxed ${isDelete ? 'text-amber-800' : 'text-orange-800'}`}>
-                {isDelete ? 'Purchase history is preserved for inventory and reporting purposes. You can restore at any time.' : 'The supplier will be immediately available for linking to new stock purchases.'}
+              <svg className={`w-4 h-4 flex-shrink-0 mt-0.5 ${isDelete ? 'text-amber-600' : 'text-blue-600'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              <p className={`text-xs leading-relaxed ${isDelete ? 'text-amber-800' : 'text-blue-800'}`}>
+                {isDelete
+                  ? 'Purchase history is preserved for inventory and reporting purposes. You can restore at any time.'
+                  : 'The supplier will be immediately available for linking to new stock purchases.'}
               </p>
             </div>
           </div>
+
           <div className="flex gap-3">
-            <button onClick={onCancel} className="flex-1 px-4 py-2.5 bg-white hover:bg-gray-50 text-gray-700 text-sm font-semibold border border-gray-300 rounded-lg transition-all shadow-sm">Cancel</button>
+            <button
+              onClick={onCancel}
+              className="flex-1 px-4 py-2.5 bg-white hover:bg-gray-50 text-gray-700 text-sm font-semibold border border-gray-300 rounded-lg transition-all shadow-sm"
+            >
+              Cancel
+            </button>
             <button
               onClick={onConfirm}
-              className={`flex-1 px-4 py-2.5 text-white text-sm font-semibold rounded-lg transition-all shadow-md hover:shadow-lg flex items-center justify-center gap-2 ${isDelete ? 'bg-gradient-to-r from-red-600 to-red-500 hover:from-red-700 hover:to-red-600' : 'bg-gradient-to-r from-orange-600 to-orange-500 hover:from-orange-700 hover:to-orange-600'}`}
+              className={`flex-1 px-4 py-2.5 text-white text-sm font-semibold rounded-lg transition-all shadow-md hover:shadow-lg flex items-center justify-center gap-2 ${isDelete
+                  ? 'bg-gradient-to-r from-red-600 to-red-500 hover:from-red-700 hover:to-red-600'
+                  : 'bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600'
+                }`}
             >
               {isDelete ? (
-                <><svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>Delete</>
+                <>
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                  </svg>
+                  Delete
+                </>
               ) : (
-                <><svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>Restore</>
+                <>
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                  </svg>
+                  Restore
+                </>
               )}
             </button>
           </div>
@@ -459,19 +507,16 @@ const SupplierActionModal = ({ mode, supplier, onConfirm, onCancel }: SupplierAc
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
         @keyframes scaleIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
       `}</style>
-    </div>
+    </div>,
+    document.body
   )
 }
 
 // ─── Supplier Card ─────────────────────────────────────────────────────────────
 
 type SupplierCardProps = {
-  supplier: Supplier
-  expanded: boolean
-  onToggle: () => void
-  onDelete?: (id: number) => void
-  onRestore?: (id: number) => void
-  onEdit?: (id: number) => void
+  supplier: Supplier; expanded: boolean; onToggle: () => void
+  onDelete?: (id: number) => void; onRestore?: (id: number) => void; onEdit?: (id: number) => void
 }
 
 const SupplierCard = ({ supplier, expanded, onToggle, onDelete, onRestore, onEdit }: SupplierCardProps) => {
@@ -493,27 +538,21 @@ const SupplierCard = ({ supplier, expanded, onToggle, onDelete, onRestore, onEdi
   return (
     <>
       <div className={`group ${supplier.is_deleted ? 'opacity-70' : ''}`}>
-        {/* ── Main Row ── */}
         <div
           onClick={onToggle}
-          className={`
-            relative grid grid-cols-1 lg:grid-cols-12 items-center gap-3 lg:gap-4
-            px-4 lg:px-6 py-4 border-b border-gray-100
-            hover:bg-gray-50/80 transition-all duration-200 cursor-pointer
-            ${expanded ? 'bg-orange-50/40' : ''} ${supplier.is_deleted ? 'bg-red-50/20' : ''}
-          `}
+          className={`relative grid grid-cols-1 lg:grid-cols-12 items-center gap-3 lg:gap-4 px-4 lg:px-6 py-4 border-b border-gray-100 hover:bg-gray-50/80 transition-all duration-200 cursor-pointer
+            ${expanded ? 'bg-blue-50/40' : ''} ${supplier.is_deleted ? 'bg-red-50/20' : ''}`}
         >
-          {/* Col 1: Avatar */}
+          {/* Avatar */}
           <div className="lg:col-span-1 flex items-center gap-3 lg:gap-0">
             <SupplierAvatar name={supplier.supplier_name} isDeleted={supplier.is_deleted} />
-            {/* Mobile: name inline */}
             <div className="lg:hidden flex-1 min-w-0">
               <div className="font-semibold text-gray-900 truncate">{supplier.supplier_name}</div>
               <div className="text-xs text-gray-500 mt-0.5">{supplier.contact_person || supplier.phone_number || 'No contact'}</div>
             </div>
           </div>
 
-          {/* Col 2: Supplier name + contact person (desktop) */}
+          {/* Name + ID */}
           <div className="hidden lg:flex lg:col-span-3 flex-col justify-center min-w-0">
             <div className="font-semibold text-gray-900 truncate">{supplier.supplier_name}</div>
             <div className="text-xs text-gray-500 mt-0.5">
@@ -521,60 +560,69 @@ const SupplierCard = ({ supplier, expanded, onToggle, onDelete, onRestore, onEdi
             </div>
           </div>
 
-          {/* Col 3: Contact info */}
+          {/* Contact */}
           <div className="hidden lg:flex lg:col-span-3 flex-col justify-center min-w-0">
             {supplier.phone_number && (
               <div className="flex items-center gap-1.5 text-xs text-gray-600">
-                <svg className="w-3.5 h-3.5 text-gray-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" /></svg>
+                <svg className="w-3.5 h-3.5 text-gray-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+                </svg>
                 <span className="truncate">{supplier.phone_number}</span>
               </div>
             )}
             {supplier.email && (
               <div className="flex items-center gap-1.5 text-xs text-gray-500 mt-0.5">
-                <svg className="w-3.5 h-3.5 text-gray-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg>
+                <svg className="w-3.5 h-3.5 text-gray-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                </svg>
                 <span className="truncate">{supplier.email}</span>
               </div>
             )}
             {!supplier.phone_number && !supplier.email && <span className="text-xs text-gray-400 italic">No contact info</span>}
           </div>
 
-          {/* Col 4: Supply stats badge */}
+          {/* Purchases */}
           <div className="hidden lg:flex lg:col-span-2 items-center">
-            <div className="px-3 py-1.5 bg-orange-50 rounded-lg border border-orange-100">
-              <div className="text-xs font-semibold text-orange-700">{formatCurrency(supplier.purchase_stats?.total_spent)}</div>
-              <div className="text-xs text-orange-500">{totalPurchases} purchase{totalPurchases !== 1 ? 's' : ''}</div>
+            <div className="px-3 py-1.5 bg-blue-50 rounded-lg border border-blue-100">
+              <div className="text-xs font-semibold text-blue-700">{formatCurrency(supplier.purchase_stats?.total_spent)}</div>
+              <div className="text-xs text-blue-500">{totalPurchases} purchase{totalPurchases !== 1 ? 's' : ''}</div>
             </div>
           </div>
 
-          {/* Col 5: Status */}
+          {/* Status */}
           <div className="hidden lg:flex lg:col-span-2 items-center">
-            <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold border ${
-              supplier.is_deleted ? 'bg-red-50 text-red-700 border-red-200'
-              : supplier.is_active ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
-              : 'bg-gray-100 text-gray-600 border-gray-200'
-            }`}>
-              <span className={`w-1.5 h-1.5 rounded-full ${supplier.is_deleted ? 'bg-red-400' : supplier.is_active ? 'bg-emerald-400' : 'bg-gray-400'}`} />
+            <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold border ${supplier.is_deleted ? 'bg-red-50 text-red-700 border-red-200'
+                : supplier.is_active ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
+                  : 'bg-gray-100 text-gray-600 border-gray-200'
+              }`}>
+              <span className={`w-1.5 h-1.5 rounded-full ${supplier.is_deleted ? 'bg-red-400' : supplier.is_active ? 'bg-emerald-400' : 'bg-gray-400'
+                }`} />
               {supplier.is_deleted ? 'Deleted' : supplier.is_active ? 'Active' : 'Inactive'}
             </span>
           </div>
 
-          {/* Col 6: Toggle */}
+          {/* Toggle */}
           <div className="hidden lg:flex lg:col-span-1 justify-end">
-            <div className={`w-8 h-8 rounded-full flex items-center justify-center transition-all ${expanded ? 'bg-orange-100 text-orange-600' : 'bg-gray-100 text-gray-500 group-hover:bg-gray-200'}`}>
-              <svg className={`w-4 h-4 transition-transform duration-200 ${expanded ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
+            <div className={`w-8 h-8 rounded-full flex items-center justify-center transition-all ${expanded ? 'bg-blue-100 text-blue-600' : 'bg-gray-100 text-gray-500 group-hover:bg-gray-200'
+              }`}>
+              <svg className={`w-4 h-4 transition-transform duration-200 ${expanded ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+              </svg>
             </div>
           </div>
         </div>
 
-        {/* ── Expanded Panel ── */}
+        {/* Expanded Panel */}
         {expanded && (
-          <div className="bg-gradient-to-br from-orange-50/30 to-gray-50/60 border-b border-gray-200">
+          <div className="bg-gradient-to-br from-blue-50/30 to-gray-50/60 border-b border-gray-200">
             <div className="px-4 lg:px-8 py-5 grid grid-cols-1 lg:grid-cols-3 gap-6">
 
               {/* Supplier Info */}
               <div className="space-y-3">
                 <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider flex items-center gap-2">
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" /></svg>
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                  </svg>
                   Supplier Info
                 </h3>
                 <div className="space-y-1.5">
@@ -587,7 +635,9 @@ const SupplierCard = ({ supplier, expanded, onToggle, onDelete, onRestore, onEdi
                     <div key={row.label} className="p-2.5 rounded-lg bg-white/70 hover:bg-white transition-colors">
                       <div className="text-xs text-gray-400 mb-0.5">{row.label}</div>
                       <div className="text-sm font-medium text-gray-900 flex items-center gap-1.5">
-                        <svg className="w-3.5 h-3.5 text-gray-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={row.icon} /></svg>
+                        <svg className="w-3.5 h-3.5 text-gray-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={row.icon} />
+                        </svg>
                         {row.value || <span className="text-gray-400 italic text-xs">Not provided</span>}
                       </div>
                     </div>
@@ -598,15 +648,17 @@ const SupplierCard = ({ supplier, expanded, onToggle, onDelete, onRestore, onEdi
               {/* Supply Stats */}
               <div className="space-y-3">
                 <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider flex items-center gap-2">
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" /></svg>
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                  </svg>
                   Supply Stats
                 </h3>
                 <div className="grid grid-cols-2 gap-2">
                   {[
-                    { label: 'Total Purchases', value: `${supplier.purchase_stats?.total_purchases ?? 0}`, sub: 'orders', color: 'bg-orange-50 text-orange-700 border-orange-100' },
-                    { label: 'Qty Supplied', value: `${supplier.purchase_stats?.total_quantity ?? 0}`, sub: 'units', color: 'bg-amber-50 text-amber-700 border-amber-100' },
+                    { label: 'Total Purchases', value: `${supplier.purchase_stats?.total_purchases ?? 0}`, sub: 'orders', color: 'bg-blue-50 text-blue-700 border-blue-100' },
+                    { label: 'Qty Supplied', value: `${supplier.purchase_stats?.total_quantity ?? 0}`, sub: 'units', color: 'bg-indigo-50 text-indigo-700 border-indigo-100' },
                     { label: 'Value Supplied', value: formatCurrency(supplier.purchase_stats?.total_spent), sub: 'total', color: 'bg-emerald-50 text-emerald-700 border-emerald-100' },
-                    { label: 'Avg Margin', value: formatPercent(supplier.purchase_stats?.avg_profit_margin), sub: 'profit', color: 'bg-blue-50 text-blue-700 border-blue-100' },
+                    { label: 'Avg Margin', value: formatPercent(supplier.purchase_stats?.avg_profit_margin), sub: 'profit', color: 'bg-violet-50 text-violet-700 border-violet-100' },
                   ].map(stat => (
                     <div key={stat.label} className={`p-2.5 rounded-lg border ${stat.color}`}>
                       <div className="text-xs opacity-70 mb-0.5">{stat.label}</div>
@@ -628,7 +680,9 @@ const SupplierCard = ({ supplier, expanded, onToggle, onDelete, onRestore, onEdi
               {/* Quick Actions */}
               <div className="space-y-3">
                 <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider flex items-center gap-2">
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                  </svg>
                   Quick Actions
                 </h3>
                 <div className="space-y-2">
@@ -636,7 +690,9 @@ const SupplierCard = ({ supplier, expanded, onToggle, onDelete, onRestore, onEdi
                     onClick={e => { e.stopPropagation(); onEdit?.(supplier.id) }}
                     className="w-full px-4 py-2.5 bg-gray-900 hover:bg-gray-800 text-white text-sm font-medium rounded-lg transition-all shadow-sm hover:shadow flex items-center justify-center gap-2"
                   >
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                    </svg>
                     Edit Supplier
                   </button>
 
@@ -645,19 +701,31 @@ const SupplierCard = ({ supplier, expanded, onToggle, onDelete, onRestore, onEdi
                       onClick={e => { e.stopPropagation(); setShowDropdown(!showDropdown) }}
                       className="w-full px-4 py-2.5 bg-white hover:bg-gray-50 text-gray-700 text-sm font-medium border border-gray-300 rounded-lg transition-all shadow-sm hover:shadow flex items-center justify-center gap-2"
                     >
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z" /></svg>
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z" />
+                      </svg>
                       More Options
                     </button>
                     {showDropdown && (
                       <div className="absolute top-full left-0 right-0 mt-2 bg-white rounded-lg shadow-lg border border-gray-200 py-1 z-10">
                         {supplier.is_deleted ? (
-                          <button onClick={e => { e.stopPropagation(); setShowDropdown(false); setShowRestoreModal(true) }} className="w-full px-4 py-2.5 text-left text-sm flex items-center gap-3 hover:bg-orange-50 text-orange-600 transition-colors">
-                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>
+                          <button
+                            onClick={e => { e.stopPropagation(); setShowDropdown(false); setShowRestoreModal(true) }}
+                            className="w-full px-4 py-2.5 text-left text-sm flex items-center gap-3 hover:bg-blue-50 text-blue-600 transition-colors"
+                          >
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                            </svg>
                             <span className="font-medium">Restore Supplier</span>
                           </button>
                         ) : (
-                          <button onClick={e => { e.stopPropagation(); setShowDropdown(false); setShowDeleteModal(true) }} className="w-full px-4 py-2.5 text-left text-sm flex items-center gap-3 hover:bg-red-50 text-red-600 transition-colors">
-                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                          <button
+                            onClick={e => { e.stopPropagation(); setShowDropdown(false); setShowDeleteModal(true) }}
+                            className="w-full px-4 py-2.5 text-left text-sm flex items-center gap-3 hover:bg-red-50 text-red-600 transition-colors"
+                          >
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                            </svg>
                             <span className="font-medium">Delete Supplier</span>
                           </button>
                         )}
@@ -694,20 +762,20 @@ const SupplierCard = ({ supplier, expanded, onToggle, onDelete, onRestore, onEdi
 // ─── Main Page ────────────────────────────────────────────────────────────────
 
 const Suppliers = () => {
-  const [suppliers, setSuppliers]     = useState<Supplier[]>([])
-  const [pagination, setPagination]   = useState<Pagination | null>(null)
-  const [expandedId, setExpandedId]   = useState<number | null>(null)
-  const [loading, setLoading]         = useState(true)
-  const [search, setSearch]           = useState('')
+  const [suppliers, setSuppliers] = useState<Supplier[]>([])
+  const [pagination, setPagination] = useState<Pagination | null>(null)
+  const [expandedId, setExpandedId] = useState<number | null>(null)
+  const [loading, setLoading] = useState(true)
+  const [search, setSearch] = useState('')
   const [debouncedSearch, setDebouncedSearch] = useState('')
-  const [sortKey, setSortKey]         = useState<SortKey>('name_asc')
-  const [activeTab, setActiveTab]     = useState<TabKey>('active')
+  const [sortKey, setSortKey] = useState<SortKey>('name_asc')
+  const [activeTab, setActiveTab] = useState<TabKey>('active')
   const [currentPage, setCurrentPage] = useState(1)
-  const [showSortMenu, setShowSortMenu]     = useState(false)
+  const [showSortMenu, setShowSortMenu] = useState(false)
   const [showCreateModal, setShowCreateModal] = useState(false)
-  const [editSupplier, setEditSupplier]     = useState<Supplier | null>(null)
-  const [toasts, setToasts]           = useState<ToastMessage[]>([])
-  const [activeCount, setActiveCount]   = useState(0)
+  const [editSupplier, setEditSupplier] = useState<Supplier | null>(null)
+  const [toasts, setToasts] = useState<ToastMessage[]>([])
+  const [activeCount, setActiveCount] = useState(0)
   const [deletedCount, setDeletedCount] = useState(0)
 
   const sortMenuRef = useRef<HTMLDivElement>(null)
@@ -722,8 +790,7 @@ const Suppliers = () => {
   useEffect(() => {
     if (searchDebounceRef.current) clearTimeout(searchDebounceRef.current)
     searchDebounceRef.current = setTimeout(() => {
-      setDebouncedSearch(search)
-      setCurrentPage(1)
+      setDebouncedSearch(search); setCurrentPage(1)
     }, 350)
     return () => { if (searchDebounceRef.current) clearTimeout(searchDebounceRef.current) }
   }, [search])
@@ -733,45 +800,35 @@ const Suppliers = () => {
     try {
       const { sort_by, sort_order } = sortToApiParams(sortKey)
       const res = await window.api.products.getAllSuppliers({
-        page,
-        limit: LIMIT,
+        page, limit: LIMIT,
         is_deleted: activeTab === 'deleted' ? 'yes' : 'no',
         search: debouncedSearch || undefined,
-        sort_by: sort_by as any,
-        sort_order,
-        with_purchase_stats: true,
-        should_paginate: true,
+        sort_by: sort_by as any, sort_order,
+        with_purchase_stats: true, should_paginate: true,
       })
       if (res.success && res.data) {
-        const items = (res.data.items as Supplier[])
-        setSuppliers(items)
+        setSuppliers(res.data.items as Supplier[])
         const pag = res.data.pagination as any
         if (pag) {
           setPagination({
-            page:        pag.page        ?? page,
-            limit:       pag.limit       ?? LIMIT,
-            total:       pag.total       ?? 0,
+            page: pag.page ?? page, limit: pag.limit ?? LIMIT, total: pag.total ?? 0,
             total_pages: pag.pages ?? pag.total_pages ?? Math.ceil((pag.total ?? 0) / LIMIT),
-            has_next:    pag.has_next    ?? false,
-            has_prev:    pag.has_prev    ?? false,
-            returned:    pag.returned    ?? items.length,
+            has_next: pag.has_next ?? false, has_prev: pag.has_prev ?? false,
+            returned: pag.returned ?? (res.data.items as Supplier[]).length,
           })
         }
       } else {
         addToast(res.message || 'Failed to load suppliers', 'error')
       }
-    } catch {
-      addToast('An error occurred while loading suppliers', 'error')
-    } finally {
-      setLoading(false)
-    }
+    } catch { addToast('An error occurred while loading suppliers', 'error') }
+    finally { setLoading(false) }
   }, [activeTab, debouncedSearch, sortKey])
 
   useEffect(() => { loadSuppliers(currentPage) }, [loadSuppliers, currentPage])
 
   useEffect(() => {
     if (!pagination) return
-    if (activeTab === 'active')  setActiveCount(pagination.total)
+    if (activeTab === 'active') setActiveCount(pagination.total)
     if (activeTab === 'deleted') setDeletedCount(pagination.total)
   }, [pagination, activeTab])
 
@@ -843,15 +900,13 @@ const Suppliers = () => {
       <ToastContainer toasts={toasts} onRemoveToast={removeToast} />
 
       <SupplierModal
-        open={showCreateModal}
-        mode="create"
+        open={showCreateModal} mode="create"
         onClose={() => setShowCreateModal(false)}
         onSuccess={handleSupplierSuccess}
       />
 
       <SupplierModal
-        open={!!editSupplier}
-        mode="edit"
+        open={!!editSupplier} mode="edit"
         supplierId={editSupplier?.id}
         initialData={editSupplier ? {
           supplier_name: editSupplier.supplier_name,
@@ -865,12 +920,12 @@ const Suppliers = () => {
         onSuccess={async (msg) => { addToast(msg, 'success'); await loadSuppliers(currentPage) }}
       />
 
-      {/* ── Header ── */}
+      {/* Header */}
       <div className="bg-white border-b border-gray-200 shadow-sm">
         <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div className="flex items-start gap-3">
-              <div className="p-2.5 bg-gradient-to-br from-orange-500 to-orange-600 rounded-xl shadow-md flex-shrink-0">
+              <div className="p-2.5 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl shadow-md flex-shrink-0">
                 <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
                 </svg>
@@ -879,12 +934,14 @@ const Suppliers = () => {
                 <h1 className="text-xl sm:text-2xl font-bold text-gray-900">Suppliers</h1>
                 <div className="flex items-center gap-3 mt-1 flex-wrap">
                   <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-gray-600 bg-gray-100 px-2.5 py-1 rounded-full">
-                    <span className="w-1.5 h-1.5 rounded-full bg-orange-500" />
+                    <span className="w-1.5 h-1.5 rounded-full bg-blue-500" />
                     {activeCount} active
                   </span>
                   {activeTab === 'active' && suppliers.length > 0 && (
-                    <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-orange-700 bg-orange-50 px-2.5 py-1 rounded-full">
-                      <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" /></svg>
+                    <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-blue-700 bg-blue-50 px-2.5 py-1 rounded-full">
+                      <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+                      </svg>
                       {totalPurchasesOnPage} purchases on page
                     </span>
                   )}
@@ -904,15 +961,19 @@ const Suppliers = () => {
             <div className="flex items-center gap-2 sm:gap-3 w-full sm:w-auto">
               {/* Search */}
               <div className="relative flex-1 sm:flex-initial">
-                <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
+                <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                </svg>
                 <input
                   type="text" value={search} onChange={e => setSearch(e.target.value)}
                   placeholder="Search suppliers…"
-                  className="w-full sm:w-64 lg:w-72 pl-10 pr-10 py-2.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all bg-white"
+                  className="w-full sm:w-64 lg:w-72 pl-10 pr-10 py-2.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all bg-white"
                 />
                 {search && (
                   <button onClick={() => setSearch('')} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    </svg>
                   </button>
                 )}
               </div>
@@ -923,9 +984,13 @@ const Suppliers = () => {
                   onClick={() => setShowSortMenu(s => !s)}
                   className="flex items-center gap-1.5 px-3 py-2.5 bg-white hover:bg-gray-50 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 transition-all shadow-sm whitespace-nowrap"
                 >
-                  <svg className="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4h13M3 8h9m-9 4h9m5-4v12m0 0l-4-4m4 4l4-4" /></svg>
+                  <svg className="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4h13M3 8h9m-9 4h9m5-4v12m0 0l-4-4m4 4l4-4" />
+                  </svg>
                   <span className="hidden sm:inline">{sortLabels[sortKey]}</span>
-                  <svg className={`w-3.5 h-3.5 text-gray-400 transition-transform ${showSortMenu ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
+                  <svg className={`w-3.5 h-3.5 text-gray-400 transition-transform ${showSortMenu ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                  </svg>
                 </button>
                 {showSortMenu && (
                   <div className="absolute right-0 top-full mt-2 w-48 bg-white rounded-xl shadow-lg border border-gray-100 py-1.5 z-30">
@@ -936,12 +1001,19 @@ const Suppliers = () => {
                     ].map(({ group, keys }, gi) => (
                       <div key={group}>
                         {gi > 0 && <div className="border-t border-gray-100 my-1" />}
-                        <div className="px-3 py-1.5"><p className="text-xs font-semibold text-gray-400 uppercase tracking-wider">{group}</p></div>
+                        <div className="px-3 py-1.5">
+                          <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider">{group}</p>
+                        </div>
                         {keys.map(k => (
                           <button key={k} onClick={() => { setSortKey(k); setCurrentPage(1); setShowSortMenu(false) }}
-                            className={`w-full px-4 py-2 text-left text-sm flex items-center justify-between transition-colors ${sortKey === k ? 'bg-orange-50 text-orange-700 font-semibold' : 'hover:bg-gray-50 text-gray-700'}`}>
+                            className={`w-full px-4 py-2 text-left text-sm flex items-center justify-between transition-colors ${sortKey === k ? 'bg-blue-50 text-blue-700 font-semibold' : 'hover:bg-gray-50 text-gray-700'
+                              }`}>
                             {sortLabels[k]}
-                            {sortKey === k && <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" /></svg>}
+                            {sortKey === k && (
+                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
+                              </svg>
+                            )}
                           </button>
                         ))}
                       </div>
@@ -953,9 +1025,11 @@ const Suppliers = () => {
               {activeTab === 'active' && (
                 <button
                   onClick={() => setShowCreateModal(true)}
-                  className="px-3 sm:px-5 py-2.5 bg-gradient-to-r from-orange-600 to-orange-500 hover:from-orange-700 hover:to-orange-600 text-white text-sm font-semibold rounded-lg transition-all shadow-md hover:shadow-lg flex items-center gap-2 whitespace-nowrap"
+                  className="px-3 sm:px-5 py-2.5 bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 text-white text-sm font-semibold rounded-lg transition-all shadow-md hover:shadow-lg flex items-center gap-2 whitespace-nowrap"
                 >
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" /></svg>
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                  </svg>
                   <span className="hidden sm:inline">Add Supplier</span>
                   <span className="sm:hidden">Add</span>
                 </button>
@@ -965,29 +1039,29 @@ const Suppliers = () => {
         </div>
       </div>
 
-      {/* ── Main Content ── */}
+      {/* Main Content */}
       <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6">
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
 
           {/* Tabs */}
           <div className="flex border-b border-gray-200 px-4 sm:px-6 pt-3">
             {([
-              { key: 'active' as TabKey, label: 'Active Suppliers', count: activeCount, color: 'orange' },
+              { key: 'active' as TabKey, label: 'Active Suppliers', count: activeCount, color: 'blue' },
               { key: 'deleted' as TabKey, label: 'Deleted', count: deletedCount, color: 'red' },
             ]).map(tab => (
               <button
                 key={tab.key}
                 onClick={() => handleTabChange(tab.key)}
-                className={`
-                  relative flex items-center gap-2 px-4 py-2.5 text-sm font-semibold transition-all border-b-2 mr-1
-                  ${activeTab === tab.key
-                    ? tab.color === 'orange' ? 'text-orange-600 border-orange-600' : 'text-red-600 border-red-500'
+                className={`relative flex items-center gap-2 px-4 py-2.5 text-sm font-semibold transition-all border-b-2 mr-1 ${activeTab === tab.key
+                    ? tab.color === 'blue' ? 'text-blue-600 border-blue-600' : 'text-red-600 border-red-500'
                     : 'text-gray-500 border-transparent hover:text-gray-700 hover:border-gray-300'
-                  }
-                `}
+                  }`}
               >
                 {tab.label}
-                <span className={`inline-flex items-center justify-center min-w-[20px] h-5 px-1.5 rounded-full text-xs font-bold ${activeTab === tab.key ? tab.color === 'orange' ? 'bg-orange-100 text-orange-700' : 'bg-red-100 text-red-700' : 'bg-gray-100 text-gray-500'}`}>
+                <span className={`inline-flex items-center justify-center min-w-[20px] h-5 px-1.5 rounded-full text-xs font-bold ${activeTab === tab.key
+                    ? tab.color === 'blue' ? 'bg-blue-100 text-blue-700' : 'bg-red-100 text-red-700'
+                    : 'bg-gray-100 text-gray-500'
+                  }`}>
                   {tab.count}
                 </span>
               </button>
@@ -997,12 +1071,9 @@ const Suppliers = () => {
           {/* Table Header */}
           <div className="hidden lg:grid grid-cols-12 gap-4 px-6 py-3.5 bg-gradient-to-r from-gray-50 to-gray-100/50 border-b border-gray-200">
             {[
-              { label: 'Avatar', span: 1 },
-              { label: 'Supplier Name', span: 3 },
-              { label: 'Contact', span: 3 },
-              { label: 'Purchases', span: 2 },
-              { label: 'Status', span: 2 },
-              { label: '', span: 1 },
+              { label: 'Avatar', span: 1 }, { label: 'Supplier Name', span: 3 },
+              { label: 'Contact', span: 3 }, { label: 'Purchases', span: 2 },
+              { label: 'Status', span: 2 }, { label: '', span: 1 },
             ].map(({ label, span }) => (
               <div key={label} className={`col-span-${span}`}>
                 <span className="text-xs font-semibold text-gray-500 uppercase tracking-wider">{label}</span>
@@ -1014,11 +1085,15 @@ const Suppliers = () => {
             <SupplierSkeleton />
           ) : suppliers.length === 0 ? (
             <div className="py-16 sm:py-24 px-4 text-center">
-              <div className={`inline-flex items-center justify-center w-16 h-16 rounded-full mb-4 ${activeTab === 'deleted' ? 'bg-red-50' : 'bg-orange-50'}`}>
+              <div className={`inline-flex items-center justify-center w-16 h-16 rounded-full mb-4 ${activeTab === 'deleted' ? 'bg-red-50' : 'bg-blue-50'}`}>
                 {activeTab === 'deleted' ? (
-                  <svg className="w-8 h-8 text-red-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                  <svg className="w-8 h-8 text-red-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                  </svg>
                 ) : (
-                  <svg className="w-8 h-8 text-orange-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" /></svg>
+                  <svg className="w-8 h-8 text-blue-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                  </svg>
                 )}
               </div>
               <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-2">
@@ -1028,13 +1103,16 @@ const Suppliers = () => {
                 {debouncedSearch ? `No results for "${debouncedSearch}".` : activeTab === 'deleted' ? 'Deleted suppliers will appear here.' : 'Add your first supplier to start tracking stock purchases.'}
               </p>
               {debouncedSearch
-                ? <button onClick={() => setSearch('')} className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-orange-600 bg-orange-50 hover:bg-orange-100 rounded-lg transition-colors">Clear search</button>
+                ? <button onClick={() => setSearch('')} className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-blue-600 bg-blue-50 hover:bg-blue-100 rounded-lg transition-colors">Clear search</button>
                 : activeTab === 'active' && (
-                  <button onClick={() => setShowCreateModal(true)} className="inline-flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-orange-600 to-orange-500 hover:from-orange-700 hover:to-orange-600 text-white text-sm font-semibold rounded-lg transition-all shadow-md hover:shadow-lg">
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" /></svg>
+                  <button onClick={() => setShowCreateModal(true)} className="inline-flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 text-white text-sm font-semibold rounded-lg transition-all shadow-md hover:shadow-lg">
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                    </svg>
                     Add your first supplier
                   </button>
-                )}
+                )
+              }
             </div>
           ) : (
             <div className="divide-y divide-gray-100">
@@ -1077,7 +1155,8 @@ const Suppliers = () => {
                     <span key={`e-${idx}`} className="px-2 py-2 text-sm text-gray-400">…</span>
                   ) : (
                     <button key={item} onClick={() => goToPage(item as number)}
-                      className={`min-w-[36px] h-9 px-2 text-sm font-semibold rounded-lg transition-all ${item === pagination.page ? 'bg-orange-600 text-white shadow-md shadow-orange-200' : 'bg-white border border-gray-200 text-gray-600 hover:bg-gray-50'}`}>
+                      className={`min-w-[36px] h-9 px-2 text-sm font-semibold rounded-lg transition-all ${item === pagination.page ? 'bg-blue-600 text-white shadow-md shadow-blue-200' : 'bg-white border border-gray-200 text-gray-600 hover:bg-gray-50'
+                        }`}>
                       {item}
                     </button>
                   )

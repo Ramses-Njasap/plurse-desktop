@@ -1,46 +1,35 @@
 import { ChevronDown, LogOut, User } from 'lucide-react'
 import { useState } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
+import { useSidebar } from '@renderer/contexts/sidebar.context'
 
 const Navbar = () => {
   const navigate = useNavigate()
   const location = useLocation()
+  const { isCollapsed } = useSidebar()
   const [isDropdownOpen, setIsDropdownOpen] = useState(false)
 
-  // Mock user name (replace with actual user data from auth context or API)
   const userName = '?'
-  const getAcronym = (name) => {
-    return name
-      .split(' ')
-      .map((word) => word[0])
-      .join('')
-      .toUpperCase()
-      .slice(0, 2)
+  const getAcronym = (name: string) => {
+    return name.split(' ').map((word) => word[0]).join('').toUpperCase().slice(0, 2)
   }
 
-  // Determine button text and target based on route
   const isOnSalesPoint = location.pathname === '/sales-point'
   const buttonText = isOnSalesPoint ? 'To Dashboard' : 'To Sales Point'
   const buttonTarget = isOnSalesPoint ? '/dashboard/inventory' : '/sales-point'
-  const buttonBg = isOnSalesPoint
-    ? 'bg-gray-600 hover:bg-gray-700'
-    : 'bg-blue-600 hover:bg-blue-700'
+  const buttonBg = isOnSalesPoint ? 'bg-gray-600 hover:bg-gray-700' : 'bg-blue-600 hover:bg-blue-700'
 
-  const preventCopy = (e) => {
-    e.preventDefault()
-  }
-
-  const handleLogout = () => {
-    navigate('/login')
-  }
+  const preventCopy = (e: React.ClipboardEvent) => e.preventDefault()
+  const handleLogout = () => navigate('/login')
 
   return (
     <div
-      className="bg-white/90 backdrop-blur-sm border-b border-gray-100 px-8 py-4 flex justify-end items-center select-none fixed top-0 left-64 right-0 z-30"
+      className={`bg-white/90 backdrop-blur-sm border-b border-gray-100 px-8 py-4 flex justify-end items-center select-none fixed top-0 right-0 z-30 transition-all duration-300 ${
+        isCollapsed ? 'left-16' : 'left-64'
+      }`}
       onCopy={preventCopy}
     >
       <div className="flex items-center gap-4">
-        {/* Context-Aware Button */}
         <Link
           to={buttonTarget}
           className={`inline-flex items-center px-4 py-2 text-white rounded-md ${buttonBg} transition-colors text-sm font-medium`}
@@ -48,7 +37,6 @@ const Navbar = () => {
           {buttonText}
         </Link>
 
-        {/* Profile Dropdown */}
         <div className="relative">
           <button
             onClick={() => setIsDropdownOpen(!isDropdownOpen)}
@@ -70,10 +58,7 @@ const Navbar = () => {
                 View Profile
               </Link>
               <button
-                onClick={() => {
-                  setIsDropdownOpen(false)
-                  handleLogout()
-                }}
+                onClick={() => { setIsDropdownOpen(false); handleLogout() }}
                 className="flex items-center gap-2 px-4 py-2 text-gray-800 hover:bg-blue-50 transition-colors text-sm w-full text-left"
               >
                 <LogOut className="w-4 h-4" />

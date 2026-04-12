@@ -1,163 +1,77 @@
 // src/components/products/product-offcanvas.tsx
 
-import React from 'react';
-import CategorySelect from './category-select';
-import ProductImage from './product-image';
+import React from 'react'
+import ReactDOM from 'react-dom'
+import CategorySelect from './category-select'
+import ProductImage from './product-image'
 
-// ─── Types (aligned with getProductById in preload/index.d.ts) ────────────────
+// ─── Types ────────────────────────────────────────────────────────────────────
 
-// getProductById → skus[n].attributes
 type SkuAttribute = {
-  id: number
-  attribute_id?: number
-  name: string
-  value: string
-  unit: string | null
-  display_value?: string
-  is_active?: boolean
-  sync_id?: string | null
+  id: number; attribute_id?: number; name: string; value: string
+  unit: string | null; display_value?: string; is_active?: boolean; sync_id?: string | null
 }
 
-// getProductById → skus[n].recent_purchases — nested shape
 type RecentPurchase = {
-  id: number
-  batch_number: string | null
+  id: number; batch_number: string | null
   quantities: { bought: number; sold: number; remaining: number }
-  pricing: {
-    price_per_unit: number
-    landed_cost_per_unit: number
-    total_price: number
-    shipping_cost: number
-    selling_price_range: { min: number; max: number }
-  }
+  pricing: { price_per_unit: number; landed_cost_per_unit: number; total_price: number; shipping_cost: number; selling_price_range: { min: number; max: number } }
   financials: { revenue: number; cost: number; shipping_paid: number; profit: number; margin: number }
   dates: { purchased: number | null; arrived: number | null; manufacture: string | null; expiry: string | null }
   supplier: { id: number; name: string; contact: string | null; email: string | null; phone: string | null; is_active: boolean } | null
   performance: { sale_count: number; sell_through_rate: number; days_on_hand: number }
 }
 
-// getProductById → skus[n].metrics
 type SkuMetrics = {
-  total_bought: number
-  total_sold: number
-  total_remaining: number
-  total_revenue: number
-  total_cost: number
-  total_shipping_paid: number
-  total_profit: number
-  profit_margin: number
-  avg_cost_per_unit: number
-  avg_selling_price: number
-  avg_profit_per_unit: number
-  sell_through_rate: number
-  days_of_inventory: number
-  is_low_stock: boolean
-  is_high_margin: boolean
-  is_loss_making: boolean
-  is_best_seller: boolean
+  total_bought: number; total_sold: number; total_remaining: number
+  total_revenue: number; total_cost: number; total_shipping_paid: number
+  total_profit: number; profit_margin: number; avg_cost_per_unit: number
+  avg_selling_price: number; avg_profit_per_unit: number; sell_through_rate: number
+  days_of_inventory: number; is_low_stock: boolean; is_high_margin: boolean
+  is_loss_making: boolean; is_best_seller: boolean
   stock_status: 'Out of Stock' | 'Low Stock' | 'In Stock' | 'Overstocked'
 }
 
 type Sku = {
-  id: number
-  sync_id?: string | null
-  sku_name: string
-  code: string
-  created_on?: number
-  updated_on?: number
-  is_active: boolean
-  is_deleted?: boolean
-  images: Array<any>
-  attributes: SkuAttribute[]
-  recent_purchases: RecentPurchase[]
-  total_purchases?: number
-  total_batches?: number
-  metrics: SkuMetrics
-  batch_summary?: {
-    oldest_batch: string | null
-    newest_batch: string | null
-    total_batches: number
-    active_batches: number
-  }
+  id: number; sync_id?: string | null; sku_name: string; code: string
+  created_on?: number; updated_on?: number; is_active: boolean; is_deleted?: boolean
+  images: Array<any>; attributes: SkuAttribute[]; recent_purchases: RecentPurchase[]
+  total_purchases?: number; total_batches?: number; metrics: SkuMetrics
+  batch_summary?: { oldest_batch: string | null; newest_batch: string | null; total_batches: number; active_batches: number }
 }
 
-// getProductById → metrics
 type ProductMetrics = {
-  total_items_bought: number
-  total_items_sold: number
-  total_items_remaining: number
-  total_revenue: number
-  total_cost: number
-  total_shipping_paid: number
-  total_profit: number
-  profit_margin: number
-  avg_cost_per_unit: number
-  avg_selling_price: number
-  avg_profit_per_unit: number
-  avg_sku_profit_margin: number
-  sell_through_rate: number
-  days_of_inventory: number
-  is_low_stock: boolean
-  is_high_margin: boolean
-  is_loss_making: boolean
-  is_best_seller: boolean
+  total_items_bought: number; total_items_sold: number; total_items_remaining: number
+  total_revenue: number; total_cost: number; total_shipping_paid: number
+  total_profit: number; profit_margin: number; avg_cost_per_unit: number
+  avg_selling_price: number; avg_profit_per_unit: number; avg_sku_profit_margin: number
+  sell_through_rate: number; days_of_inventory: number; is_low_stock: boolean
+  is_high_margin: boolean; is_loss_making: boolean; is_best_seller: boolean
   stock_status: 'Out of Stock' | 'Low Stock' | 'In Stock' | 'Overstocked'
 }
 
 type Product = {
-  id: number
-  sync_id?: string | null
-  product_name: string
-  description: string | null
+  id: number; sync_id?: string | null; product_name: string; description: string | null
   category: { id: number; name: string; is_active: boolean; hierarchy?: Array<{ id: number; name: string }> } | null
-  is_active: boolean
-  is_deleted: boolean
-  created_on: number
-  updated_on: number
-  images: Array<any>
-  skus: Sku[]
-  sku_count: number
-  active_sku_count?: number
+  is_active: boolean; is_deleted: boolean; created_on: number; updated_on: number
+  images: Array<any>; skus: Sku[]; sku_count: number; active_sku_count?: number
   metrics: ProductMetrics
-  summary: {
-    total_skus: number
-    active_skus: number
-    total_images: number
-    total_attributes: number
-    total_purchases: number
-    total_sales?: number
-    total_suppliers?: number
-    last_purchase: number | null
-    last_sale?: number | null
-  }
+  summary: { total_skus: number; active_skus: number; total_images: number; total_attributes: number; total_purchases: number; total_sales?: number; total_suppliers?: number; last_purchase: number | null; last_sale?: number | null }
   analytics?: any
 }
 
 type Attribute = {
-  id: number
-  attribute_name: string
-  unit: string | null
-  is_active: boolean
-  is_deleted: boolean
-  created_on: number
-  updated_on: number
-  sku_count?: number
-  unit_display: string
+  id: number; attribute_name: string; unit: string | null; is_active: boolean
+  is_deleted: boolean; created_on: number; updated_on: number; sku_count?: number; unit_display: string
 }
 
 type Props = {
-  productId: number | null
-  open: boolean
-  onClose: () => void
-  onUpdated?: () => void
-  onSync?: (id: number) => void
+  productId: number | null; open: boolean; onClose: () => void
+  onUpdated?: () => void; onSync?: (id: number) => void
 }
 
 type EditForm = {
-  product_name: string
-  description: string
-  category_id: number | null
-  is_active: boolean
+  product_name: string; description: string; category_id: number | null; is_active: boolean
 }
 
 type SortKey = 'name_asc' | 'name_desc' | 'active_first' | 'inactive_first' | 'cost_asc' | 'cost_desc'
@@ -174,50 +88,34 @@ const formatCurrency = (val: number | null | undefined) => {
   return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'XAF', minimumFractionDigits: 2 }).format(val)
 }
 
-const formatLastSync = (ts: number | null) => {
-  if (!ts) return 'Never synced'
-  const diff = Math.floor(Date.now() / 1000) - ts
-  const h = Math.floor(diff / 3600)
-  const d = Math.floor(h / 24)
-  if (d > 0) return `${d}d ago`
-  if (h > 0) return `${h}h ago`
-  return 'Just now'
-}
-
 const sortSkus = (skus: Sku[], key: SortKey): Sku[] => {
   const s = [...skus]
   switch (key) {
-    case 'name_asc':      return s.sort((a, b) => a.sku_name.localeCompare(b.sku_name))
-    case 'name_desc':     return s.sort((a, b) => b.sku_name.localeCompare(a.sku_name))
-    case 'active_first':  return s.sort((a, b) => (b.is_active ? 1 : 0) - (a.is_active ? 1 : 0))
-    case 'inactive_first':return s.sort((a, b) => (a.is_active ? 1 : 0) - (b.is_active ? 1 : 0))
-    case 'cost_asc':      return s.sort((a, b) => (a.metrics?.avg_cost_per_unit ?? 0) - (b.metrics?.avg_cost_per_unit ?? 0))
-    case 'cost_desc':     return s.sort((a, b) => (b.metrics?.avg_cost_per_unit ?? 0) - (a.metrics?.avg_cost_per_unit ?? 0))
+    case 'name_asc':       return s.sort((a, b) => a.sku_name.localeCompare(b.sku_name))
+    case 'name_desc':      return s.sort((a, b) => b.sku_name.localeCompare(a.sku_name))
+    case 'active_first':   return s.sort((a, b) => (b.is_active ? 1 : 0) - (a.is_active ? 1 : 0))
+    case 'inactive_first': return s.sort((a, b) => (a.is_active ? 1 : 0) - (b.is_active ? 1 : 0))
+    case 'cost_asc':       return s.sort((a, b) => (a.metrics?.avg_cost_per_unit ?? 0) - (b.metrics?.avg_cost_per_unit ?? 0))
+    case 'cost_desc':      return s.sort((a, b) => (b.metrics?.avg_cost_per_unit ?? 0) - (a.metrics?.avg_cost_per_unit ?? 0))
     default: return s
   }
 }
 
-// ─── SKU Detail Modal ─────────────────────────────────────────────────────────
+// ─── SKU Detail Modal — portaled to body ──────────────────────────────────────
 
 type SkuModalProps = {
-  sku: Sku
-  attributes: Attribute[]
-  productId: number
-  onClose: () => void
-  onUpdated?: () => void
-  offcanvasRef: React.RefObject<HTMLDivElement>
+  sku: Sku; attributes: Attribute[]; productId: number
+  onClose: () => void; onUpdated?: () => void
 }
 
-const SkuDetailModal = ({ sku, attributes, productId, onClose, onUpdated, offcanvasRef }: SkuModalProps) => {
+const SkuDetailModal = ({ sku, attributes, productId, onClose, onUpdated }: SkuModalProps) => {
   const [editing, setEditing] = React.useState(false)
   const [saving, setSaving] = React.useState(false)
   const [name, setName] = React.useState(sku.sku_name)
   const [code, setCode] = React.useState(sku.code)
   const [isActive, setIsActive] = React.useState(sku.is_active)
   const [attrRows, setAttrRows] = React.useState<{ attribute_id: number | null; value: string }[]>(
-    sku.attributes?.length
-      ? sku.attributes.map(a => ({ attribute_id: a.attribute_id ?? null, value: a.value }))
-      : []
+    sku.attributes?.length ? sku.attributes.map(a => ({ attribute_id: a.attribute_id ?? null, value: a.value })) : []
   )
   const [dirty, setDirty] = React.useState(false)
   const [errors, setErrors] = React.useState<Record<string, string>>({})
@@ -244,271 +142,252 @@ const SkuDetailModal = ({ sku, attributes, productId, onClose, onUpdated, offcan
     setSaving(true)
     try {
       const res = await window.api.products.updateSku({
-        id: sku.id,
-        product_id: productId,
-        sku_name: name.trim(),
-        code: code.trim(),
-        is_active: isActive,
+        id: sku.id, product_id: productId, sku_name: name.trim(), code: code.trim(), is_active: isActive,
         update_attributes: true,
-        sku_attributes: attrRows
-          .filter(r => r.attribute_id && r.value.trim())
-          .map(r => ({ attribute_id: r.attribute_id!, value: r.value.trim() })),
+        sku_attributes: attrRows.filter(r => r.attribute_id && r.value.trim()).map(r => ({ attribute_id: r.attribute_id!, value: r.value.trim() })),
       })
       if (!res.success) throw new Error(res.message)
       setDirty(false); setEditing(false); onUpdated?.()
-    } catch (err) { console.error(err) }
-    finally { setSaving(false) }
+    } catch (err) { console.error(err) } finally { setSaving(false) }
   }
 
-  const getStyle = (): React.CSSProperties => {
-    if (!offcanvasRef.current) return { position: 'fixed', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 70 }
-    const rect = offcanvasRef.current.getBoundingClientRect()
-    return { position: 'fixed', top: rect.top, left: rect.left, width: rect.width, height: rect.height, display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 70 }
-  }
-
-  return (
-    <>
-      <div style={getStyle()} onClick={onClose}>
-        <div
-          className="bg-white rounded-2xl shadow-2xl w-[90%] max-w-sm overflow-hidden"
-          style={{ animation: 'scaleIn 0.18s ease-out', maxHeight: '88%', display: 'flex', flexDirection: 'column' }}
-          onClick={e => e.stopPropagation()}
-        >
-          {/* Header */}
-          <div className={`px-5 py-4 border-b border-gray-100 flex items-center justify-between flex-shrink-0 ${editing ? 'bg-blue-50/60' : 'bg-gray-50/60'}`}>
-            <div className="flex items-center gap-2.5">
-              <div className="w-7 h-7 bg-gradient-to-br from-violet-500 to-violet-600 rounded-lg flex items-center justify-center shadow-sm">
-                <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
-                </svg>
-              </div>
-              <span className="text-sm font-bold text-gray-900">SKU Detail</span>
-              {editing && (
-                <span className="flex items-center gap-1 px-2 py-0.5 bg-blue-100 text-blue-700 text-xs font-semibold rounded-lg">
-                  <div className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse" />
-                  Editing
-                </span>
-              )}
+  return ReactDOM.createPortal(
+    <div
+      className="fixed inset-0 z-[10000] flex items-center justify-center p-4"
+      onClick={onClose}
+      style={{ animation: 'fadeIn 0.15s ease-out' }}
+    >
+      <div className="absolute inset-0 bg-black/40 backdrop-blur-[2px]" />
+      <div
+        className="relative bg-white rounded-2xl shadow-2xl w-full max-w-sm overflow-hidden z-10 flex flex-col"
+        style={{ animation: 'scaleIn 0.18s ease-out', maxHeight: '88vh' }}
+        onClick={e => e.stopPropagation()}
+      >
+        {/* Header */}
+        <div className={`px-5 py-4 border-b border-gray-100 flex items-center justify-between flex-shrink-0 ${editing ? 'bg-blue-50/60' : 'bg-gray-50/60'}`}>
+          <div className="flex items-center gap-2.5">
+            <div className="w-7 h-7 bg-gradient-to-br from-violet-500 to-violet-600 rounded-lg flex items-center justify-center shadow-sm">
+              <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+              </svg>
             </div>
-            <div className="flex items-center gap-1.5">
-              {!editing && (
-                <button onClick={() => setEditing(true)} className="flex items-center gap-1.5 px-3 py-1.5 bg-gray-900 hover:bg-gray-800 text-white text-xs font-semibold rounded-lg transition-all">
-                  <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                  </svg>
-                  Edit
-                </button>
-              )}
-              <button onClick={onClose} className="w-7 h-7 rounded-full flex items-center justify-center text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition-all">
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              </button>
-            </div>
-          </div>
-
-          {/* Body */}
-          <div className="flex-1 overflow-y-auto px-5 py-5 space-y-4">
-            {editing ? (
-              <>
-                <div>
-                  <label className="block text-xs font-semibold text-gray-600 mb-1">SKU Name <span className="text-red-500">*</span></label>
-                  <input value={name} onChange={e => set({ name: e.target.value })}
-                    className={`w-full px-3 py-2.5 rounded-lg border text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 ${errors.name ? 'border-red-300 bg-red-50' : 'border-gray-300'}`} />
-                  {errors.name && <p className="text-xs text-red-600 mt-1">{errors.name}</p>}
-                </div>
-                <div>
-                  <label className="block text-xs font-semibold text-gray-600 mb-1">SKU Code <span className="text-red-500">*</span></label>
-                  <input value={code} onChange={e => set({ code: e.target.value })}
-                    className={`w-full px-3 py-2.5 rounded-lg border text-sm font-mono focus:outline-none focus:ring-2 focus:ring-blue-500 ${errors.code ? 'border-red-300 bg-red-50' : 'border-gray-300'}`} />
-                  {errors.code && <p className="text-xs text-red-600 mt-1">{errors.code}</p>}
-                </div>
-                <div className="flex items-center justify-between py-2.5 px-3.5 bg-gray-50 rounded-lg border border-gray-200">
-                  <div>
-                    <p className="text-sm font-semibold text-gray-700">Active</p>
-                    <p className="text-xs text-gray-500">Available for sale</p>
-                  </div>
-                  <button type="button" onClick={() => { setIsActive(a => !a); setDirty(true) }}
-                    className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${isActive ? 'bg-blue-600' : 'bg-gray-300'}`}>
-                    <span className={`inline-block h-4 w-4 rounded-full bg-white shadow transform transition-transform ${isActive ? 'translate-x-6' : 'translate-x-1'}`} />
-                  </button>
-                </div>
-
-                {attributes.length > 0 && (
-                  <div>
-                    <div className="flex items-center justify-between mb-2">
-                      <label className="text-xs font-semibold text-gray-600">Attributes</label>
-                      <button type="button"
-                        onClick={() => { const unused = attributes.find(a => !attrRows.find(r => r.attribute_id === a.id)); if (unused) { setAttrRows(r => [...r, { attribute_id: unused.id, value: '' }]); setDirty(true) } }}
-                        className="text-xs text-blue-600 hover:text-blue-700 font-semibold">+ Add</button>
-                    </div>
-                    <div className="space-y-2">
-                      {attrRows.map((row, i) => (
-                        <div key={i} className="flex gap-2 items-start">
-                          <select value={row.attribute_id ?? ''}
-                            onChange={e => { setAttrRows(r => r.map((x, j) => j === i ? { ...x, attribute_id: Number(e.target.value) || null } : x)); setDirty(true) }}
-                            className="flex-1 px-3 py-2 rounded-lg border border-gray-300 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white">
-                            <option value="">Select…</option>
-                            {attributes.map(a => <option key={a.id} value={a.id}>{a.attribute_name}{a.unit ? ` (${a.unit})` : ''}</option>)}
-                          </select>
-                          <input value={row.value}
-                            onChange={e => { setAttrRows(r => r.map((x, j) => j === i ? { ...x, value: e.target.value } : x)); setDirty(true) }}
-                            placeholder="Value"
-                            className="flex-1 px-3 py-2 rounded-lg border border-gray-300 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white" />
-                          <button onClick={() => { setAttrRows(r => r.filter((_, j) => j !== i)); setDirty(true) }}
-                            className="w-8 h-8 flex items-center justify-center rounded-lg border border-gray-200 text-gray-400 hover:text-red-500 hover:border-red-200 transition-all flex-shrink-0">
-                            <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
-                          </button>
-                        </div>
-                      ))}
-                      {attrRows.length === 0 && (
-                        <button type="button"
-                          onClick={() => { const a = attributes[0]; if (a) { setAttrRows([{ attribute_id: a.id, value: '' }]); setDirty(true) } }}
-                          className="w-full flex items-center justify-center gap-2 py-3 border-2 border-dashed border-gray-200 rounded-lg text-xs text-gray-400 hover:border-blue-300 hover:text-blue-500 transition-all">
-                          + Add an attribute
-                        </button>
-                      )}
-                    </div>
-                  </div>
-                )}
-              </>
-            ) : (
-              <div className="space-y-3">
-                {/* SKU identity */}
-                <div className="text-center pb-2">
-                  <div className="w-14 h-14 rounded-2xl overflow-hidden border-2 border-gray-200 shadow-sm mx-auto mb-3">
-                    {sku.images?.[0] ? (
-                      <img src={(() => { try { return window.api.files.readFileAsDataURL((sku.images[0] as any).path) ?? '' } catch { return '' } })()} alt={sku.sku_name} className="w-full h-full object-cover" />
-                    ) : (
-                      <div className="w-full h-full bg-gradient-to-br from-violet-400 to-violet-600 flex items-center justify-center">
-                        <span className="text-white text-lg font-bold">{sku.sku_name.charAt(0).toUpperCase()}</span>
-                      </div>
-                    )}
-                  </div>
-                  <h3 className="text-base font-bold text-gray-900">{sku.sku_name}</h3>
-                  <p className="text-xs text-gray-500 font-mono mt-0.5">{sku.code}</p>
-                  <div className="flex items-center justify-center gap-2 mt-2">
-                    <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium ${sku.is_active ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-600'}`}>
-                      <div className={`w-1.5 h-1.5 rounded-full ${sku.is_active ? 'bg-green-500' : 'bg-gray-400'}`} />
-                      {sku.is_active ? 'Active' : 'Inactive'}
-                    </span>
-                    {sku.metrics?.stock_status && (
-                      <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-600">
-                        {sku.metrics.stock_status}
-                      </span>
-                    )}
-                  </div>
-                </div>
-
-                {/* Metrics — updated to new field names */}
-                <div className="grid grid-cols-2 gap-2">
-                  <div className="bg-blue-50 rounded-lg p-2.5 text-center">
-                    <div className="text-lg font-bold text-blue-700">{sku.metrics?.total_remaining ?? 0}</div>
-                    <div className="text-xs text-blue-600">Remaining</div>
-                  </div>
-                  <div className="bg-emerald-50 rounded-lg p-2.5 text-center">
-                    <div className="text-lg font-bold text-emerald-700">{sku.metrics?.total_sold ?? 0}</div>
-                    <div className="text-xs text-emerald-600">Sold</div>
-                  </div>
-                  <div className="bg-violet-50 rounded-lg p-2.5 text-center">
-                    <div className="text-sm font-bold text-violet-700">{formatCurrency(sku.metrics?.avg_cost_per_unit)}</div>
-                    <div className="text-xs text-violet-600">Avg Cost</div>
-                  </div>
-                  <div className="bg-amber-50 rounded-lg p-2.5 text-center">
-                    <div className="text-sm font-bold text-amber-700">{`${((sku.metrics?.profit_margin ?? 0) * 100).toFixed(1)}%`}</div>
-                    <div className="text-xs text-amber-600">Margin</div>
-                  </div>
-                </div>
-
-                {/* Attributes */}
-                {sku.attributes && sku.attributes.length > 0 && (
-                  <div>
-                    <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Attributes</p>
-                    <div className="flex flex-wrap gap-1.5">
-                      {sku.attributes.map(a => (
-                        <span key={a.id} className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-gray-100 text-xs font-medium text-gray-700">
-                          <span className="text-gray-400">{a.name}:</span> {a.value}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                {/* Recent purchases — defensively handle both nested (getSkuById) and flat (getProductById) shapes */}
-                {sku.recent_purchases && sku.recent_purchases.length > 0 && (
-                  <div>
-                    <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Recent Purchases</p>
-                    <div className="space-y-1.5">
-                      {sku.recent_purchases.slice(0, 3).map((p: any) => {
-                        // Support both nested shape (pricing.total_price) and flat shape (total_price_bought)
-                        const totalPrice = p.pricing?.total_price ?? p.total_price_bought ?? null
-                        const unitPrice  = p.pricing?.price_per_unit ?? p.price_per_unit ?? null
-                        const bought     = p.quantities?.bought ?? p.quantity ?? null
-                        const remaining  = p.quantities?.remaining ?? null
-                        const margin     = p.financials?.margin ?? p.avg_anticipated_profit_margin ?? null
-                        const supplierName = p.supplier?.name ?? p.supplier_name ?? null
-                        return (
-                          <div key={p.id} className="p-2.5 bg-gray-50 rounded-lg border border-gray-100 text-xs">
-                            <div className="flex items-center justify-between mb-1">
-                              <span className="font-semibold text-gray-700">#{p.id}</span>
-                              <span className="font-semibold text-emerald-700">{formatCurrency(totalPrice)}</span>
-                            </div>
-                            <div className="flex gap-3 text-gray-500">
-                              {bought != null && <span>Bought: <span className="text-gray-700 font-medium">{bought}</span></span>}
-                              {remaining != null && <span>Remaining: <span className="text-gray-700 font-medium">{remaining}</span></span>}
-                            </div>
-                            <div className="flex gap-3 text-gray-500 mt-0.5">
-                              {unitPrice != null && <span>Unit: <span className="text-gray-700 font-medium">{formatCurrency(unitPrice)}</span></span>}
-                              {margin != null && <span>Margin: <span className="text-gray-700 font-medium">{((margin ?? 0) * 100).toFixed(1)}%</span></span>}
-                            </div>
-                            {supplierName && <div className="mt-1 text-gray-500">Supplier: <span className="text-gray-700 font-medium">{supplierName}</span></div>}
-                          </div>
-                        )
-                      })}
-                    </div>
-                  </div>
-                )}
-              </div>
+            <span className="text-sm font-bold text-gray-900">SKU Detail</span>
+            {editing && (
+              <span className="flex items-center gap-1 px-2 py-0.5 bg-blue-100 text-blue-700 text-xs font-semibold rounded-lg">
+                <div className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse" />
+                Editing
+              </span>
             )}
           </div>
+          <div className="flex items-center gap-1.5">
+            {!editing && (
+              <button onClick={() => setEditing(true)} className="flex items-center gap-1.5 px-3 py-1.5 bg-gray-900 hover:bg-gray-800 text-white text-xs font-semibold rounded-lg transition-all">
+                <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                </svg>
+                Edit
+              </button>
+            )}
+            <button onClick={onClose} className="w-7 h-7 rounded-full flex items-center justify-center text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition-all">
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
+        </div>
 
-          {/* Footer when editing + dirty */}
-          {editing && dirty && (
-            <div className="px-5 pb-5 pt-2 flex gap-2.5 flex-shrink-0 border-t border-gray-100">
-              <button onClick={handleDiscard} className="flex-1 px-3 py-2.5 bg-white hover:bg-gray-50 text-gray-700 text-sm font-semibold border border-gray-300 rounded-lg transition-all">
-                Discard
-              </button>
-              <button onClick={handleSave} disabled={saving}
-                className="flex-1 px-3 py-2.5 bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 disabled:opacity-50 text-white text-sm font-semibold rounded-lg transition-all flex items-center justify-center gap-2">
-                {saving
-                  ? <svg className="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" /><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" /></svg>
-                  : <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>}
-                {saving ? 'Saving…' : 'Save Changes'}
-              </button>
+        {/* Body */}
+        <div className="flex-1 overflow-y-auto px-5 py-5 space-y-4">
+          {editing ? (
+            <>
+              <div>
+                <label className="block text-xs font-semibold text-gray-600 mb-1">SKU Name <span className="text-red-500">*</span></label>
+                <input value={name} onChange={e => set({ name: e.target.value })}
+                  className={`w-full px-3 py-2.5 rounded-lg border text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 ${errors.name ? 'border-red-300 bg-red-50' : 'border-gray-300'}`} />
+                {errors.name && <p className="text-xs text-red-600 mt-1">{errors.name}</p>}
+              </div>
+              <div>
+                <label className="block text-xs font-semibold text-gray-600 mb-1">SKU Code <span className="text-red-500">*</span></label>
+                <input value={code} onChange={e => set({ code: e.target.value })}
+                  className={`w-full px-3 py-2.5 rounded-lg border text-sm font-mono focus:outline-none focus:ring-2 focus:ring-blue-500 ${errors.code ? 'border-red-300 bg-red-50' : 'border-gray-300'}`} />
+                {errors.code && <p className="text-xs text-red-600 mt-1">{errors.code}</p>}
+              </div>
+              <div className="flex items-center justify-between py-2.5 px-3.5 bg-gray-50 rounded-lg border border-gray-200">
+                <div>
+                  <p className="text-sm font-semibold text-gray-700">Active</p>
+                  <p className="text-xs text-gray-500">Available for sale</p>
+                </div>
+                <button type="button" onClick={() => { setIsActive(a => !a); setDirty(true) }}
+                  className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${isActive ? 'bg-blue-600' : 'bg-gray-300'}`}>
+                  <span className={`inline-block h-4 w-4 rounded-full bg-white shadow transform transition-transform ${isActive ? 'translate-x-6' : 'translate-x-1'}`} />
+                </button>
+              </div>
+              {attributes.length > 0 && (
+                <div>
+                  <div className="flex items-center justify-between mb-2">
+                    <label className="text-xs font-semibold text-gray-600">Attributes</label>
+                    <button type="button"
+                      onClick={() => { const unused = attributes.find(a => !attrRows.find(r => r.attribute_id === a.id)); if (unused) { setAttrRows(r => [...r, { attribute_id: unused.id, value: '' }]); setDirty(true) } }}
+                      className="text-xs text-blue-600 hover:text-blue-700 font-semibold">+ Add</button>
+                  </div>
+                  <div className="space-y-2">
+                    {attrRows.map((row, i) => (
+                      <div key={i} className="flex gap-2 items-start">
+                        <select value={row.attribute_id ?? ''}
+                          onChange={e => { setAttrRows(r => r.map((x, j) => j === i ? { ...x, attribute_id: Number(e.target.value) || null } : x)); setDirty(true) }}
+                          className="flex-1 px-3 py-2 rounded-lg border border-gray-300 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white">
+                          <option value="">Select…</option>
+                          {attributes.map(a => <option key={a.id} value={a.id}>{a.attribute_name}{a.unit ? ` (${a.unit})` : ''}</option>)}
+                        </select>
+                        <input value={row.value}
+                          onChange={e => { setAttrRows(r => r.map((x, j) => j === i ? { ...x, value: e.target.value } : x)); setDirty(true) }}
+                          placeholder="Value"
+                          className="flex-1 px-3 py-2 rounded-lg border border-gray-300 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white" />
+                        <button onClick={() => { setAttrRows(r => r.filter((_, j) => j !== i)); setDirty(true) }}
+                          className="w-8 h-8 flex items-center justify-center rounded-lg border border-gray-200 text-gray-400 hover:text-red-500 hover:border-red-200 transition-all flex-shrink-0">
+                          <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+                        </button>
+                      </div>
+                    ))}
+                    {attrRows.length === 0 && (
+                      <button type="button"
+                        onClick={() => { const a = attributes[0]; if (a) { setAttrRows([{ attribute_id: a.id, value: '' }]); setDirty(true) } }}
+                        className="w-full flex items-center justify-center gap-2 py-3 border-2 border-dashed border-gray-200 rounded-lg text-xs text-gray-400 hover:border-blue-300 hover:text-blue-500 transition-all">
+                        + Add an attribute
+                      </button>
+                    )}
+                  </div>
+                </div>
+              )}
+            </>
+          ) : (
+            <div className="space-y-3">
+              <div className="text-center pb-2">
+                <div className="w-14 h-14 rounded-2xl overflow-hidden border-2 border-gray-200 shadow-sm mx-auto mb-3">
+                  {sku.images?.[0] ? (
+                    <img src={(() => { try { return window.api.files.readFileAsDataURL((sku.images[0] as any).path) ?? '' } catch { return '' } })()} alt={sku.sku_name} className="w-full h-full object-cover" />
+                  ) : (
+                    <div className="w-full h-full bg-gradient-to-br from-violet-400 to-violet-600 flex items-center justify-center">
+                      <span className="text-white text-lg font-bold">{sku.sku_name.charAt(0).toUpperCase()}</span>
+                    </div>
+                  )}
+                </div>
+                <h3 className="text-base font-bold text-gray-900">{sku.sku_name}</h3>
+                <p className="text-xs text-gray-500 font-mono mt-0.5">{sku.code}</p>
+                <div className="flex items-center justify-center gap-2 mt-2">
+                  <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium ${sku.is_active ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-600'}`}>
+                    <div className={`w-1.5 h-1.5 rounded-full ${sku.is_active ? 'bg-green-500' : 'bg-gray-400'}`} />
+                    {sku.is_active ? 'Active' : 'Inactive'}
+                  </span>
+                  {sku.metrics?.stock_status && (
+                    <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-600">
+                      {sku.metrics.stock_status}
+                    </span>
+                  )}
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-2">
+                <div className="bg-blue-50 rounded-lg p-2.5 text-center">
+                  <div className="text-lg font-bold text-blue-700">{sku.metrics?.total_remaining ?? 0}</div>
+                  <div className="text-xs text-blue-600">Remaining</div>
+                </div>
+                <div className="bg-emerald-50 rounded-lg p-2.5 text-center">
+                  <div className="text-lg font-bold text-emerald-700">{sku.metrics?.total_sold ?? 0}</div>
+                  <div className="text-xs text-emerald-600">Sold</div>
+                </div>
+                <div className="bg-violet-50 rounded-lg p-2.5 text-center">
+                  <div className="text-sm font-bold text-violet-700">{formatCurrency(sku.metrics?.avg_cost_per_unit)}</div>
+                  <div className="text-xs text-violet-600">Avg Cost</div>
+                </div>
+                <div className="bg-amber-50 rounded-lg p-2.5 text-center">
+                  <div className="text-sm font-bold text-amber-700">{`${((sku.metrics?.profit_margin ?? 0) * 100).toFixed(1)}%`}</div>
+                  <div className="text-xs text-amber-600">Margin</div>
+                </div>
+              </div>
+              {sku.attributes && sku.attributes.length > 0 && (
+                <div>
+                  <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Attributes</p>
+                  <div className="flex flex-wrap gap-1.5">
+                    {sku.attributes.map(a => (
+                      <span key={a.id} className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-gray-100 text-xs font-medium text-gray-700">
+                        <span className="text-gray-400">{a.name}:</span> {a.value}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
+              {sku.recent_purchases && sku.recent_purchases.length > 0 && (
+                <div>
+                  <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Recent Purchases</p>
+                  <div className="space-y-1.5">
+                    {sku.recent_purchases.slice(0, 3).map((p: any) => {
+                      const totalPrice   = p.pricing?.total_price ?? p.total_price_bought ?? null
+                      const unitPrice    = p.pricing?.price_per_unit ?? p.price_per_unit ?? null
+                      const bought       = p.quantities?.bought ?? p.quantity ?? null
+                      const remaining    = p.quantities?.remaining ?? null
+                      const margin       = p.financials?.margin ?? p.avg_anticipated_profit_margin ?? null
+                      const supplierName = p.supplier?.name ?? p.supplier_name ?? null
+                      return (
+                        <div key={p.id} className="p-2.5 bg-gray-50 rounded-lg border border-gray-100 text-xs">
+                          <div className="flex items-center justify-between mb-1">
+                            <span className="font-semibold text-gray-700">#{p.id}</span>
+                            <span className="font-semibold text-emerald-700">{formatCurrency(totalPrice)}</span>
+                          </div>
+                          <div className="flex gap-3 text-gray-500">
+                            {bought != null && <span>Bought: <span className="text-gray-700 font-medium">{bought}</span></span>}
+                            {remaining != null && <span>Remaining: <span className="text-gray-700 font-medium">{remaining}</span></span>}
+                          </div>
+                          <div className="flex gap-3 text-gray-500 mt-0.5">
+                            {unitPrice != null && <span>Unit: <span className="text-gray-700 font-medium">{formatCurrency(unitPrice)}</span></span>}
+                            {margin != null && <span>Margin: <span className="text-gray-700 font-medium">{((margin ?? 0) * 100).toFixed(1)}%</span></span>}
+                          </div>
+                          {supplierName && <div className="mt-1 text-gray-500">Supplier: <span className="text-gray-700 font-medium">{supplierName}</span></div>}
+                        </div>
+                      )
+                    })}
+                  </div>
+                </div>
+              )}
             </div>
           )}
         </div>
+
+        {editing && dirty && (
+          <div className="px-5 pb-5 pt-2 flex gap-2.5 flex-shrink-0 border-t border-gray-100">
+            <button onClick={handleDiscard} className="flex-1 px-3 py-2.5 bg-white hover:bg-gray-50 text-gray-700 text-sm font-semibold border border-gray-300 rounded-lg transition-all">
+              Discard
+            </button>
+            <button onClick={handleSave} disabled={saving}
+              className="flex-1 px-3 py-2.5 bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 disabled:opacity-50 text-white text-sm font-semibold rounded-lg transition-all flex items-center justify-center gap-2">
+              {saving
+                ? <svg className="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" /><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" /></svg>
+                : <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
+              }
+              {saving ? 'Saving…' : 'Save Changes'}
+            </button>
+          </div>
+        )}
       </div>
-      <style>{`@keyframes scaleIn { from { opacity:0; transform:scale(0.94); } to { opacity:1; transform:scale(1); } }`}</style>
-    </>
+      <style>{`
+        @keyframes fadeIn { from { opacity:0; } to { opacity:1; } }
+        @keyframes scaleIn { from { opacity:0; transform:scale(0.94); } to { opacity:1; transform:scale(1); } }
+      `}</style>
+    </div>,
+    document.body
   )
 }
 
 // ─── Main Offcanvas ────────────────────────────────────────────────────────────
 
 const ProductOffcanvas = ({ productId, open, onClose, onUpdated, onSync }: Props) => {
-  const panelRef = React.useRef<HTMLDivElement>(null)
-
   const [product, setProduct] = React.useState<Product | null>(null)
   const [loading, setLoading] = React.useState(false)
   const [attributes, setAttributes] = React.useState<Attribute[]>([])
-
   const [editing, setEditing] = React.useState(false)
   const [saving, setSaving] = React.useState(false)
   const [dirty, setDirty] = React.useState(false)
   const [form, setForm] = React.useState<EditForm>({ product_name: '', description: '', category_id: null, is_active: true })
   const [formErrors, setFormErrors] = React.useState<Record<string, string>>({})
-
   const [skuSearch, setSkuSearch] = React.useState('')
   const [skuSort, setSkuSort] = React.useState<SortKey>('name_asc')
   const [showSortMenu, setShowSortMenu] = React.useState(false)
@@ -538,11 +417,16 @@ const ProductOffcanvas = ({ productId, open, onClose, onUpdated, onSync }: Props
           setForm({ product_name: p.product_name, description: p.description ?? '', category_id: p.category?.id ?? null, is_active: p.is_active })
         }
         if (attrRes?.success && attrRes.data) setAttributes(attrRes.data.items ?? [])
-      } catch (err) { console.error(err) }
-      finally { setLoading(false) }
+      } catch (err) { console.error(err) } finally { setLoading(false) }
     }
     load()
   }, [open, productId])
+
+  // Lock body scroll
+  React.useEffect(() => {
+    document.body.style.overflow = open ? 'hidden' : ''
+    return () => { document.body.style.overflow = '' }
+  }, [open])
 
   React.useEffect(() => {
     const h = (e: MouseEvent) => { if (sortMenuRef.current && !sortMenuRef.current.contains(e.target as Node)) setShowSortMenu(false) }
@@ -580,8 +464,7 @@ const ProductOffcanvas = ({ productId, open, onClose, onUpdated, onSync }: Props
         setProduct(p)
         setForm({ product_name: p.product_name, description: p.description ?? '', category_id: p.category?.id ?? null, is_active: p.is_active })
       }
-    } catch (err) { console.error(err) }
-    finally { setSaving(false) }
+    } catch (err) { console.error(err) } finally { setSaving(false) }
   }
 
   const filteredSkus = sortSkus(
@@ -591,22 +474,22 @@ const ProductOffcanvas = ({ productId, open, onClose, onUpdated, onSync }: Props
     skuSort
   )
 
-  // last_synced_at is not in getProductById — use sync_id as a proxy for sync state
   const isPendingSync = !product?.sync_id
 
-  return (
+  return ReactDOM.createPortal(
     <>
+      {/* Backdrop — full viewport */}
       <div
-        className={`fixed top-0 left-64 right-0 bottom-0 z-40 bg-black/25 backdrop-blur-sm transition-opacity duration-300 ${open ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
+        className={`fixed inset-0 z-[9998] bg-black/25 backdrop-blur-sm transition-opacity duration-300 ${open ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
         onClick={onClose}
       />
 
+      {/* Panel */}
       <div
-        ref={panelRef}
-        className={`fixed top-0 right-0 z-50 h-full bg-white shadow-2xl flex flex-col transition-transform duration-300 ease-out ${open ? 'translate-x-0' : 'translate-x-full'}`}
+        className={`fixed top-0 right-0 z-[9999] h-full bg-white shadow-2xl flex flex-col transition-transform duration-300 ease-out overflow-x-hidden ${open ? 'translate-x-0' : 'translate-x-full'}`}
         style={{ width: 'min(520px, 100vw)' }}
       >
-        {/* Panel Header */}
+        {/* Header */}
         <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100 bg-gradient-to-r from-gray-50 to-white flex-shrink-0">
           <div className="flex items-center gap-3">
             <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center shadow-sm">
@@ -643,7 +526,7 @@ const ProductOffcanvas = ({ productId, open, onClose, onUpdated, onSync }: Props
         </div>
 
         {/* Scrollable Body */}
-        <div className="flex-1 overflow-y-auto">
+        <div className="flex-1 overflow-y-auto overflow-x-hidden">
           {loading ? (
             <div className="flex items-center justify-center h-full">
               <div className="flex flex-col items-center gap-3 text-gray-400">
@@ -658,7 +541,7 @@ const ProductOffcanvas = ({ productId, open, onClose, onUpdated, onSync }: Props
             <div className="flex items-center justify-center h-full text-gray-400 text-sm">Product not found</div>
           ) : (
             <>
-              {/* Hero section */}
+              {/* Hero */}
               <div className={`px-5 pt-5 pb-4 ${editing ? 'bg-blue-50/40' : 'bg-gradient-to-b from-gray-50/80 to-white'} transition-colors`}>
                 <div className="flex items-start gap-4">
                   <div className="relative flex-shrink-0">
@@ -742,7 +625,7 @@ const ProductOffcanvas = ({ productId, open, onClose, onUpdated, onSync }: Props
                 </div>
               )}
 
-              {/* Stats row — updated field names */}
+              {/* Stats */}
               <div className="px-5 py-4 grid grid-cols-4 gap-3 border-b border-gray-100">
                 <div className="bg-blue-50 rounded-xl p-3 text-center">
                   <div className="text-xl font-bold text-blue-700">{product.sku_count}</div>
@@ -762,7 +645,7 @@ const ProductOffcanvas = ({ productId, open, onClose, onUpdated, onSync }: Props
                 </div>
               </div>
 
-              {/* Meta info */}
+              {/* Financial details */}
               <div className="px-5 py-4 border-b border-gray-100 space-y-3">
                 <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Financial Details</h4>
                 <div className="grid grid-cols-2 gap-3 text-sm">
@@ -783,7 +666,6 @@ const ProductOffcanvas = ({ productId, open, onClose, onUpdated, onSync }: Props
                     <div className="font-medium text-gray-900">{formatDate(product.created_on)}</div>
                   </div>
                 </div>
-
                 {isPendingSync && onSync && (
                   <button onClick={() => onSync(product.id)}
                     className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-amber-50 hover:bg-amber-100 border border-amber-200 text-amber-800 text-sm font-semibold rounded-lg transition-all">
@@ -818,7 +700,6 @@ const ProductOffcanvas = ({ productId, open, onClose, onUpdated, onSync }: Props
                       SKUs ({product.skus.length})
                     </h4>
                   </div>
-
                   <div className="flex gap-2 mb-3">
                     <div className="relative flex-1">
                       <svg className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -846,7 +727,6 @@ const ProductOffcanvas = ({ productId, open, onClose, onUpdated, onSync }: Props
                       )}
                     </div>
                   </div>
-
                   {filteredSkus.length === 0 ? (
                     <div className="py-6 text-center text-xs text-gray-400">No SKUs match your search</div>
                   ) : (
@@ -886,7 +766,6 @@ const ProductOffcanvas = ({ productId, open, onClose, onUpdated, onSync }: Props
                   )}
                 </div>
               )}
-
               <div className="h-6" />
             </>
           )}
@@ -900,16 +779,15 @@ const ProductOffcanvas = ({ productId, open, onClose, onUpdated, onSync }: Props
           productId={product.id}
           onClose={() => setSelectedSku(null)}
           onUpdated={() => {
-            setSelectedSku(null)
-            onUpdated?.()
+            setSelectedSku(null); onUpdated?.()
             window.api.products.getProductById({ id: product.id, include_deleted: true }).then(res => {
               if (res.success && res.data) setProduct(res.data as unknown as Product)
             })
           }}
-          offcanvasRef={panelRef as React.RefObject<HTMLDivElement>}
         />
       )}
-    </>
+    </>,
+    document.body
   )
 }
 

@@ -1,6 +1,7 @@
 // components/dashboard-overview/dashboard-modal.tsx
 
 import React, { useEffect } from 'react'
+import ReactDOM from 'react-dom'
 import CustomersModalContent from './customers-modal-content'
 import DebtModalContent from './debt-modal-content'
 import InventoryModalContent from './inventory-modal-content'
@@ -30,10 +31,14 @@ interface DashboardModalProps {
   onPeriodChange?: (period: ComparisonPeriod) => void
 }
 
-const modalConfig: Record<
-  NonNullable<ModalType>,
-  { title: string; subtitle: string; icon: React.ReactNode; color: string }
-> = {
+interface ModalConfig {
+  title: string
+  subtitle: string
+  icon: React.ReactNode
+  color: string
+}
+
+const modalConfig: Record<NonNullable<ModalType>, ModalConfig> = {
   sales: {
     title: 'Sales Analytics',
     subtitle: 'Revenue, transactions & profit trends',
@@ -96,34 +101,45 @@ const modalConfig: Record<
   },
 }
 
-const DashboardModal: React.FC<DashboardModalProps> = ({ 
-  type, 
-  onClose, 
-  data, 
+const DashboardModal: React.FC<DashboardModalProps> = ({
+  type,
+  onClose,
+  data,
   loading = false,
   selectedPeriod,
-  onPeriodChange
+  onPeriodChange,
 }) => {
   useEffect(() => {
+    if (!type) return
     const handler = (e: KeyboardEvent) => {
       if (e.key === 'Escape') onClose()
     }
+    document.body.style.overflow = 'hidden'
     window.addEventListener('keydown', handler)
-    return () => window.removeEventListener('keydown', handler)
-  }, [onClose])
+    return () => {
+      document.body.style.overflow = ''
+      window.removeEventListener('keydown', handler)
+    }
+  }, [type, onClose])
 
   if (!type) return null
+
   const config = modalConfig[type]
 
-  return (
+  return ReactDOM.createPortal(
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-4"
-      onClick={(e) => e.target === e.currentTarget && onClose()}
+      className="fixed inset-0 z-[9999] flex items-center justify-center p-4"
+      onMouseDown={(e) => {
+        if (e.target === e.currentTarget) onClose()
+      }}
     >
       {/* Backdrop */}
-      <div className="absolute inset-0 bg-black/30 backdrop-blur-sm" onClick={onClose} />
+      <div
+        className="absolute inset-0 bg-black/40 backdrop-blur-[2px]"
+        onClick={onClose}
+      />
 
-      {/* Modal */}
+      {/* Modal panel */}
       <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[85vh] flex flex-col z-10 animate-[slideUp_0.2s_ease-out]">
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b border-gray-100 flex-shrink-0">
@@ -159,35 +175,22 @@ const DashboardModal: React.FC<DashboardModalProps> = ({
             </div>
           ) : (
             <>
-              {type === 'sales' && (
-                <SalesModalContent 
-                  data={data?.sales} 
-                  // period="today" 
+              {(type === 'sales' || type === 'revenue' || type === 'profit') && (
+                <SalesModalContent
+                  data={data?.sales}
                   selectedPeriod={selectedPeriod}
                   onPeriodChange={onPeriodChange}
                 />
               )}
-              {type === 'revenue' && (
-                <SalesModalContent 
-                  data={data?.sales} 
-                  // period="mtd" 
-                  selectedPeriod={selectedPeriod}
-                  onPeriodChange={onPeriodChange}
-                />
+              {type === 'debt' && (
+                <DebtModalContent data={data?.sales} />
               )}
-              {type === 'profit' && (
-                <SalesModalContent 
-                  data={data?.sales} 
-                  // period="mtd" 
-                  selectedPeriod={selectedPeriod}
-                  onPeriodChange={onPeriodChange}
-                />
+              {type === 'inventory' && (
+                <InventoryModalContent data={data?.inventory} />
               )}
-              {type === 'debt' && <DebtModalContent data={data?.sales} />}
-              {type === 'inventory' && <InventoryModalContent data={data?.inventory} />}
               {type === 'customers' && (
-                <CustomersModalContent 
-                  data={data?.customers} 
+                <CustomersModalContent
+                  data={data?.customers}
                   selectedPeriod={selectedPeriod}
                   onPeriodChange={onPeriodChange}
                 />
@@ -196,7 +199,8 @@ const DashboardModal: React.FC<DashboardModalProps> = ({
           )}
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   )
 }
 

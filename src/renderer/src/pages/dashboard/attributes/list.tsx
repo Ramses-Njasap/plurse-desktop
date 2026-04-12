@@ -1,5 +1,8 @@
+// pages/dashboard/attributes/list.tsx
+
 import ToastContainer, { ToastMessage } from '@renderer/components/toast/toast-container'
 import { useCallback, useEffect, useRef, useState } from 'react'
+import ReactDOM from 'react-dom'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -25,7 +28,6 @@ type Pagination = {
   returned: number
 }
 
-
 type SortKey = 'name_asc' | 'name_desc' | 'date_asc' | 'date_desc' | 'skus_asc' | 'skus_desc'
 type TabKey = 'active' | 'deleted'
 
@@ -40,17 +42,12 @@ const sortLabels: Record<SortKey, string> = {
   skus_desc: 'Most SKUs',
 }
 
-// ─── Toast ────────────────────────────────────────────────────────────────────
-
 // ─── Skeleton ─────────────────────────────────────────────────────────────────
 
 const AttributeSkeleton = () => (
   <div className="divide-y divide-gray-100">
     {[...Array(8)].map((_, i) => (
-      <div
-        key={i}
-        className="grid grid-cols-12 gap-4 px-6 py-4 animate-pulse"
-      >
+      <div key={i} className="grid grid-cols-12 gap-4 px-6 py-4 animate-pulse">
         <div className="col-span-1 flex items-center">
           <div className="w-9 h-9 bg-gray-200 rounded-xl" />
         </div>
@@ -91,9 +88,7 @@ const AttributeIcon = ({ name, isDeleted }: { name: string; isDeleted?: boolean 
     'from-emerald-400 to-emerald-600',
     'from-orange-400 to-orange-600',
   ]
-  const gradient = isDeleted
-    ? 'from-gray-300 to-gray-400'
-    : colors[name.charCodeAt(0) % colors.length]
+  const gradient = isDeleted ? 'from-gray-300 to-gray-400' : colors[name.charCodeAt(0) % colors.length]
   const initial = (name || '?').charAt(0).toUpperCase()
 
   return (
@@ -120,19 +115,23 @@ const ConfirmModal = ({
 }) => {
   const isDelete = mode === 'delete'
 
-  return (
+  return ReactDOM.createPortal(
     <div
-      className="fixed top-0 left-64 right-0 bottom-0 z-50 flex items-center justify-center p-4 bg-black/30 backdrop-blur-sm"
-      style={{ animation: 'fadeIn 0.15s ease-out' }}
+      className="fixed inset-0 z-[9999] flex items-center justify-center p-4"
       onClick={onCancel}
+      style={{ animation: 'fadeIn 0.15s ease-out' }}
     >
+      <div className="absolute inset-0 bg-black/30 backdrop-blur-sm" />
       <div
-        className="bg-white rounded-2xl shadow-2xl max-w-sm w-full overflow-hidden"
+        className="relative bg-white rounded-2xl shadow-2xl max-w-sm w-full overflow-hidden z-10"
         style={{ animation: 'scaleIn 0.15s ease-out' }}
         onClick={(e) => e.stopPropagation()}
       >
         <div
-          className={`px-6 pt-6 pb-4 ${isDelete ? 'bg-gradient-to-br from-red-50 to-red-100/40' : 'bg-gradient-to-br from-green-50 to-green-100/40'}`}
+          className={`px-6 pt-6 pb-4 ${isDelete
+              ? 'bg-gradient-to-br from-red-50 to-red-100/40'
+              : 'bg-gradient-to-br from-green-50 to-green-100/40'
+            }`}
         >
           <div className="flex items-start gap-4">
             <AttributeIcon name={attribute.attribute_name} isDeleted={!isDelete} />
@@ -158,7 +157,8 @@ const ConfirmModal = ({
         <div className="px-6 py-5">
           <div className="flex items-start gap-3 mb-4">
             <div
-              className={`w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 ${isDelete ? 'bg-red-100' : 'bg-green-100'}`}
+              className={`w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 ${isDelete ? 'bg-red-100' : 'bg-green-100'
+                }`}
             >
               {isDelete ? (
                 <svg className="w-5 h-5 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -183,19 +183,16 @@ const ConfirmModal = ({
           </div>
 
           <div
-            className={`rounded-lg p-3 mb-5 border ${isDelete ? 'bg-blue-50 border-blue-200' : 'bg-green-50 border-green-200'}`}
+            className={`rounded-lg p-3 mb-5 border ${isDelete ? 'bg-blue-50 border-blue-200' : 'bg-green-50 border-green-200'
+              }`}
           >
             <div className="flex gap-2">
               <svg
                 className={`w-4 h-4 flex-shrink-0 mt-0.5 ${isDelete ? 'text-blue-600' : 'text-green-600'}`}
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
+                fill="none" stroke="currentColor" viewBox="0 0 24 24"
               >
                 <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
+                  strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
                   d={
                     isDelete
                       ? 'M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z'
@@ -220,11 +217,10 @@ const ConfirmModal = ({
             </button>
             <button
               onClick={onConfirm}
-              className={`flex-1 px-4 py-2.5 text-white text-sm font-semibold rounded-lg transition-all shadow-md hover:shadow-lg flex items-center justify-center gap-2 ${
-                isDelete
+              className={`flex-1 px-4 py-2.5 text-white text-sm font-semibold rounded-lg transition-all shadow-md hover:shadow-lg flex items-center justify-center gap-2 ${isDelete
                   ? 'bg-gradient-to-r from-red-600 to-red-500 hover:from-red-700 hover:to-red-600'
                   : 'bg-gradient-to-r from-green-600 to-green-500 hover:from-green-700 hover:to-green-600'
-              }`}
+                }`}
             >
               {isDelete ? (
                 <>
@@ -249,7 +245,8 @@ const ConfirmModal = ({
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
         @keyframes scaleIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
       `}</style>
-    </div>
+    </div>,
+    document.body
   )
 }
 
@@ -257,7 +254,7 @@ const ConfirmModal = ({
 
 type OffcanvasProps = {
   open: boolean
-  attributeId: number | null // null = create mode
+  attributeId: number | null
   onClose: () => void
   onSaved: () => void
   addToast: (msg: string, type: 'success' | 'error') => void
@@ -309,6 +306,12 @@ const AttributeOffcanvas = ({ open, attributeId, onClose, onSaved, addToast }: O
     }
     load()
   }, [open, attributeId])
+
+  // Lock body scroll when open
+  useEffect(() => {
+    document.body.style.overflow = open ? 'hidden' : ''
+    return () => { document.body.style.overflow = '' }
+  }, [open])
 
   const validate = () => {
     const e: Record<string, string> = {}
@@ -373,17 +376,19 @@ const AttributeOffcanvas = ({ open, attributeId, onClose, onSaved, addToast }: O
   const formatDate = (ts: number) =>
     new Date(ts * 1000).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })
 
-  return (
+  return ReactDOM.createPortal(
     <>
-      {/* Backdrop */}
+      {/* Backdrop — full viewport */}
       <div
-        className={`fixed top-0 left-64 right-0 bottom-0 z-40 bg-black/25 backdrop-blur-sm transition-opacity duration-300 ${open ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
+        className={`fixed inset-0 z-[9998] bg-black/25 backdrop-blur-sm transition-opacity duration-300 ${open ? 'opacity-100' : 'opacity-0 pointer-events-none'
+          }`}
         onClick={onClose}
       />
 
-      {/* Panel */}
+      {/* Panel — fully off-screen when closed */}
       <div
-        className={`fixed top-0 right-0 z-50 h-full bg-white shadow-2xl flex flex-col transition-transform duration-300 ease-out ${open ? 'translate-x-0' : 'translate-x-full'}`}
+        className={`fixed top-0 right-0 z-[9999] h-full bg-white shadow-2xl flex flex-col transition-transform duration-300 ease-out ${open ? 'translate-x-0' : 'translate-x-full'
+          }`}
         style={{ width: 'min(440px, 100vw)' }}
       >
         {/* Header */}
@@ -422,7 +427,7 @@ const AttributeOffcanvas = ({ open, attributeId, onClose, onSaved, addToast }: O
         </div>
 
         {/* Body */}
-        <div className="flex-1 overflow-y-auto">
+        <div className="flex-1 overflow-y-auto overflow-x-hidden">
           {loading ? (
             <div className="flex items-center justify-center h-full">
               <div className="flex flex-col items-center gap-3 text-gray-400">
@@ -444,11 +449,12 @@ const AttributeOffcanvas = ({ open, attributeId, onClose, onSaved, addToast }: O
                       <h3 className="text-base font-bold text-gray-900">{attribute.attribute_name}</h3>
                       <div className="flex flex-wrap gap-1.5 mt-1">
                         <span
-                          className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium border ${attribute.is_active ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-gray-100 text-gray-600 border-gray-200'}`}
+                          className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium border ${attribute.is_active
+                              ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
+                              : 'bg-gray-100 text-gray-600 border-gray-200'
+                            }`}
                         >
-                          <div
-                            className={`w-1.5 h-1.5 rounded-full ${attribute.is_active ? 'bg-emerald-500' : 'bg-gray-400'}`}
-                          />
+                          <div className={`w-1.5 h-1.5 rounded-full ${attribute.is_active ? 'bg-emerald-500' : 'bg-gray-400'}`} />
                           {attribute.is_active ? 'Active' : 'Inactive'}
                         </span>
                         {attribute.is_deleted && (
@@ -460,7 +466,6 @@ const AttributeOffcanvas = ({ open, attributeId, onClose, onSaved, addToast }: O
                     </div>
                   </div>
 
-                  {/* Quick stats */}
                   <div className="grid grid-cols-3 gap-3 mt-4">
                     <div className="bg-violet-50 rounded-xl p-3 text-center">
                       <div className="text-xl font-bold text-violet-700">{attribute.sku_count ?? 0}</div>
@@ -493,11 +498,10 @@ const AttributeOffcanvas = ({ open, attributeId, onClose, onSaved, addToast }: O
                       setErrors((er) => { const n = { ...er }; delete n.name; return n })
                     }}
                     placeholder="e.g. Color, Size, Material"
-                    className={`w-full px-4 py-3 rounded-lg border text-sm focus:outline-none focus:ring-2 transition-all ${
-                      errors.name
+                    className={`w-full px-4 py-3 rounded-lg border text-sm focus:outline-none focus:ring-2 transition-all ${errors.name
                         ? 'border-red-300 focus:ring-red-400 bg-red-50'
                         : 'border-gray-300 focus:ring-blue-500 bg-white'
-                    }`}
+                      }`}
                   />
                   {errors.name && <p className="text-xs text-red-600 mt-1">{errors.name}</p>}
                 </div>
@@ -505,22 +509,14 @@ const AttributeOffcanvas = ({ open, attributeId, onClose, onSaved, addToast }: O
                 {/* Unit */}
                 <div>
                   <label className="block text-xs font-semibold text-gray-600 mb-1.5">
-                    Unit{' '}
-                    <span className="ml-1 text-xs font-normal text-gray-400">(optional)</span>
+                    Unit <span className="ml-1 text-xs font-normal text-gray-400">(optional)</span>
                   </label>
                   <div className="relative">
                     <svg
                       className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
+                      fill="none" stroke="currentColor" viewBox="0 0 24 24"
                     >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M3 6l3 1m0 0l-3 9a5.002 5.002 0 006.001 0M6 7l3 9M6 7l6-2m6 2l3-1m-3 1l-3 9a5.002 5.002 0 006.001 0M18 7l3 9m-3-9l-6-2m0-2v2m0 16V5m0 16H9m3 0h3"
-                      />
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 6l3 1m0 0l-3 9a5.002 5.002 0 006.001 0M6 7l3 9M6 7l6-2m6 2l3-1m-3 1l-3 9a5.002 5.002 0 006.001 0M18 7l3 9m-3-9l-6-2m0-2v2m0 16V5m0 16H9m3 0h3" />
                     </svg>
                     <input
                       type="text"
@@ -552,10 +548,7 @@ const AttributeOffcanvas = ({ open, attributeId, onClose, onSaved, addToast }: O
                       <button
                         key={s.name}
                         type="button"
-                        onClick={() => {
-                          set({ name: s.name, unit: s.unit })
-                          setErrors({})
-                        }}
+                        onClick={() => { set({ name: s.name, unit: s.unit }); setErrors({}) }}
                         className="px-2.5 py-1 bg-gray-100 hover:bg-blue-50 hover:text-blue-700 text-gray-600 text-xs font-medium rounded-lg border border-gray-200 hover:border-blue-200 transition-all"
                       >
                         {s.name}
@@ -574,14 +567,12 @@ const AttributeOffcanvas = ({ open, attributeId, onClose, onSaved, addToast }: O
                   <button
                     type="button"
                     onClick={() => set({ isActive: !isActive })}
-                    className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 ${
-                      isActive ? 'bg-blue-600' : 'bg-gray-300'
-                    }`}
+                    className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 ${isActive ? 'bg-blue-600' : 'bg-gray-300'
+                      }`}
                   >
                     <span
-                      className={`inline-block h-4 w-4 rounded-full bg-white shadow-sm transform transition-transform duration-200 ${
-                        isActive ? 'translate-x-6' : 'translate-x-1'
-                      }`}
+                      className={`inline-block h-4 w-4 rounded-full bg-white shadow-sm transform transition-transform duration-200 ${isActive ? 'translate-x-6' : 'translate-x-1'
+                        }`}
                     />
                   </button>
                 </div>
@@ -592,7 +583,9 @@ const AttributeOffcanvas = ({ open, attributeId, onClose, onSaved, addToast }: O
                     <svg className="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
                     </svg>
-                    <p className="text-sm text-red-700 font-medium">This attribute has been deleted. Restore it to make edits.</p>
+                    <p className="text-sm text-red-700 font-medium">
+                      This attribute has been deleted. Restore it to make edits.
+                    </p>
                   </div>
                 )}
               </div>
@@ -661,7 +654,8 @@ const AttributeOffcanvas = ({ open, attributeId, onClose, onSaved, addToast }: O
           </div>
         )}
       </div>
-    </>
+    </>,
+    document.body
   )
 }
 
@@ -698,9 +692,8 @@ const AttributeRow = ({
   return (
     <>
       <div
-        className={`group grid grid-cols-12 items-center gap-4 px-6 py-4 hover:bg-gray-50/80 transition-all duration-150 ${
-          attribute.is_deleted ? 'opacity-70 bg-red-50/20' : ''
-        }`}
+        className={`group grid grid-cols-12 items-center gap-4 px-6 py-4 hover:bg-gray-50/80 transition-all duration-150 ${attribute.is_deleted ? 'opacity-70 bg-red-50/20' : ''
+          }`}
       >
         {/* Icon */}
         <div className="col-span-1">
@@ -742,18 +735,16 @@ const AttributeRow = ({
         {/* Status */}
         <div className="col-span-2">
           <span
-            className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold border ${
-              attribute.is_deleted
+            className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold border ${attribute.is_deleted
                 ? 'bg-red-50 text-red-700 border-red-200'
                 : attribute.is_active
-                ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
-                : 'bg-gray-100 text-gray-600 border-gray-200'
-            }`}
+                  ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
+                  : 'bg-gray-100 text-gray-600 border-gray-200'
+              }`}
           >
             <span
-              className={`w-1.5 h-1.5 rounded-full ${
-                attribute.is_deleted ? 'bg-red-400' : attribute.is_active ? 'bg-emerald-400' : 'bg-gray-400'
-              }`}
+              className={`w-1.5 h-1.5 rounded-full ${attribute.is_deleted ? 'bg-red-400' : attribute.is_active ? 'bg-emerald-400' : 'bg-gray-400'
+                }`}
             />
             {attribute.is_deleted ? 'Deleted' : attribute.is_active ? 'Active' : 'Inactive'}
           </span>
@@ -761,7 +752,6 @@ const AttributeRow = ({
 
         {/* Actions */}
         <div className="col-span-2 flex items-center justify-end gap-2">
-          {/* Created date — subtle */}
           <span className="text-xs text-gray-400 hidden xl:inline">{formatDate(attribute.created_on)}</span>
 
           {!attribute.is_deleted && (
@@ -776,7 +766,6 @@ const AttributeRow = ({
             </button>
           )}
 
-          {/* More menu */}
           <div className="relative" ref={dropdownRef}>
             <button
               onClick={() => setShowDropdown((s) => !s)}
@@ -865,12 +854,10 @@ const Attributes = () => {
   const [deletedCount, setDeletedCount] = useState(0)
 
   const [offcanvasOpen, setOffcanvasOpen] = useState(false)
-  const [offcanvasId, setOffcanvasId] = useState<number | null>(null) // null = create
+  const [offcanvasId, setOffcanvasId] = useState<number | null>(null)
 
   const sortMenuRef = useRef<HTMLDivElement>(null)
   const searchDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
-
-  // ── Helpers ──────────────────────────────────────────────────────────────────
 
   const addToast = useCallback((message: string, type: ToastMessage['type']) => {
     const id = Date.now().toString()
@@ -878,8 +865,6 @@ const Attributes = () => {
   }, [])
 
   const removeToast = (id: string) => setToasts((prev) => prev.filter((t) => t.id !== id))
-
-  // ── Debounce search ───────────────────────────────────────────────────────────
 
   useEffect(() => {
     if (searchDebounceRef.current) clearTimeout(searchDebounceRef.current)
@@ -889,8 +874,6 @@ const Attributes = () => {
     }, 350)
     return () => { if (searchDebounceRef.current) clearTimeout(searchDebounceRef.current) }
   }, [search])
-
-  // ── Fetch ─────────────────────────────────────────────────────────────────────
 
   const loadAttributes = useCallback(
     async (page = 1) => {
@@ -909,7 +892,6 @@ const Attributes = () => {
         const res = await window.api.products.getAllAttributes({
           page,
           limit: LIMIT,
-          is_active: activeTab === 'deleted' ? undefined : undefined,
           include_deleted: activeTab === 'deleted',
           search: debouncedSearch || undefined,
           sort_by: sort_by as any,
@@ -920,9 +902,7 @@ const Attributes = () => {
 
         if (res.success && res.data) {
           const all = res.data.items as Attribute[]
-          const items = all.filter((a) =>
-            activeTab === 'deleted' ? a.is_deleted : !a.is_deleted
-          )
+          const items = all.filter((a) => (activeTab === 'deleted' ? a.is_deleted : !a.is_deleted))
           setAttributes(items)
 
           const pag = res.data.pagination as any
@@ -953,14 +933,11 @@ const Attributes = () => {
     loadAttributes(currentPage)
   }, [loadAttributes, currentPage])
 
-  // Update tab counts from pagination
   useEffect(() => {
     if (!pagination) return
     if (activeTab === 'active') setActiveCount(pagination.total)
     if (activeTab === 'deleted') setDeletedCount(pagination.total)
   }, [pagination, activeTab])
-
-  // ── Click-outside sort menu ───────────────────────────────────────────────────
 
   useEffect(() => {
     const h = (e: MouseEvent) => {
@@ -970,8 +947,6 @@ const Attributes = () => {
     if (showSortMenu) document.addEventListener('mousedown', h)
     return () => document.removeEventListener('mousedown', h)
   }, [showSortMenu])
-
-  // ── Tab / sort handlers ───────────────────────────────────────────────────────
 
   const handleTabChange = (tab: TabKey) => {
     if (tab === activeTab) return
@@ -986,8 +961,6 @@ const Attributes = () => {
     setCurrentPage(1)
     setShowSortMenu(false)
   }
-
-  // ── CRUD ──────────────────────────────────────────────────────────────────────
 
   const handleDelete = async (id: number) => {
     const name = attributes.find((a) => a.id === id)?.attribute_name ?? 'Attribute'
@@ -1033,10 +1006,8 @@ const Attributes = () => {
 
   const handleSaved = async () => {
     await loadAttributes(currentPage)
-    if (offcanvasId === null) setActiveCount((c) => c + 1) // created new
+    if (offcanvasId === null) setActiveCount((c) => c + 1)
   }
-
-  // ── Pagination ────────────────────────────────────────────────────────────────
 
   const goToPage = (page: number) => {
     setCurrentPage(page)
@@ -1055,8 +1026,6 @@ const Attributes = () => {
     return range
   }
 
-  // ── Render ────────────────────────────────────────────────────────────────────
-
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100/50">
       <ToastContainer toasts={toasts} onRemoveToast={removeToast} />
@@ -1069,7 +1038,7 @@ const Attributes = () => {
         addToast={addToast}
       />
 
-      {/* ── Header ── */}
+      {/* Header */}
       <div className="bg-white border-b border-gray-200 shadow-sm">
         <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -1106,9 +1075,7 @@ const Attributes = () => {
               <div className="relative flex-1 sm:flex-initial">
                 <svg
                   className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
+                  fill="none" stroke="currentColor" viewBox="0 0 24 24"
                 >
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                 </svg>
@@ -1143,9 +1110,7 @@ const Attributes = () => {
                   <span className="hidden sm:inline">{sortLabels[sortKey]}</span>
                   <svg
                     className={`w-3.5 h-3.5 text-gray-400 transition-transform ${showSortMenu ? 'rotate-180' : ''}`}
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
+                    fill="none" stroke="currentColor" viewBox="0 0 24 24"
                   >
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                   </svg>
@@ -1166,11 +1131,10 @@ const Attributes = () => {
                           <button
                             key={k}
                             onClick={() => handleSortChange(k)}
-                            className={`w-full px-4 py-2 text-left text-sm flex items-center justify-between transition-colors ${
-                              sortKey === k
+                            className={`w-full px-4 py-2 text-left text-sm flex items-center justify-between transition-colors ${sortKey === k
                                 ? 'bg-blue-50 text-blue-700 font-semibold'
                                 : 'hover:bg-gray-50 text-gray-700'
-                            }`}
+                              }`}
                           >
                             {sortLabels[k]}
                             {sortKey === k && (
@@ -1186,7 +1150,7 @@ const Attributes = () => {
                 )}
               </div>
 
-              {/* Add button — only on active tab */}
+              {/* Add button */}
               {activeTab === 'active' && (
                 <button
                   onClick={handleCreate}
@@ -1204,7 +1168,7 @@ const Attributes = () => {
         </div>
       </div>
 
-      {/* ── Main Content ── */}
+      {/* Main Content */}
       <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6">
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
 
@@ -1217,23 +1181,21 @@ const Attributes = () => {
               <button
                 key={tab.key}
                 onClick={() => handleTabChange(tab.key)}
-                className={`relative flex items-center gap-2 px-4 py-2.5 text-sm font-semibold transition-all border-b-2 mr-1 ${
-                  activeTab === tab.key
+                className={`relative flex items-center gap-2 px-4 py-2.5 text-sm font-semibold transition-all border-b-2 mr-1 ${activeTab === tab.key
                     ? tab.color === 'blue'
                       ? 'text-blue-600 border-blue-500'
                       : 'text-red-600 border-red-500'
                     : 'text-gray-500 border-transparent hover:text-gray-700 hover:border-gray-300'
-                }`}
+                  }`}
               >
                 {tab.label}
                 <span
-                  className={`inline-flex items-center justify-center min-w-[20px] h-5 px-1.5 rounded-full text-xs font-bold ${
-                    activeTab === tab.key
+                  className={`inline-flex items-center justify-center min-w-[20px] h-5 px-1.5 rounded-full text-xs font-bold ${activeTab === tab.key
                       ? tab.color === 'blue'
                         ? 'bg-blue-100 text-blue-700'
                         : 'bg-red-100 text-red-700'
                       : 'bg-gray-100 text-gray-500'
-                  }`}
+                    }`}
                 >
                   {tab.count}
                 </span>
@@ -1263,9 +1225,8 @@ const Attributes = () => {
           ) : attributes.length === 0 ? (
             <div className="py-16 sm:py-24 px-4 text-center">
               <div
-                className={`inline-flex items-center justify-center w-16 h-16 rounded-full mb-4 ${
-                  activeTab === 'deleted' ? 'bg-red-50' : 'bg-blue-50'
-                }`}
+                className={`inline-flex items-center justify-center w-16 h-16 rounded-full mb-4 ${activeTab === 'deleted' ? 'bg-red-50' : 'bg-blue-50'
+                  }`}
               >
                 {activeTab === 'deleted' ? (
                   <svg className="w-8 h-8 text-red-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1281,15 +1242,15 @@ const Attributes = () => {
                 {debouncedSearch
                   ? 'No attributes found'
                   : activeTab === 'deleted'
-                  ? 'No deleted attributes'
-                  : 'No attributes yet'}
+                    ? 'No deleted attributes'
+                    : 'No attributes yet'}
               </h3>
               <p className="text-sm text-gray-500 mb-6 max-w-sm mx-auto">
                 {debouncedSearch
                   ? `No results for "${debouncedSearch}".`
                   : activeTab === 'deleted'
-                  ? 'Deleted attributes will appear here.'
-                  : 'Attributes define variant properties like Color, Size, or Material for your SKUs.'}
+                    ? 'Deleted attributes will appear here.'
+                    : 'Attributes define variant properties like Color, Size, or Material for your SKUs.'}
               </p>
               {debouncedSearch ? (
                 <button
@@ -1364,11 +1325,10 @@ const Attributes = () => {
                     <button
                       key={item}
                       onClick={() => goToPage(item as number)}
-                      className={`min-w-[36px] h-9 px-2 text-sm font-semibold rounded-lg transition-all ${
-                        item === pagination.page
+                      className={`min-w-[36px] h-9 px-2 text-sm font-semibold rounded-lg transition-all ${item === pagination.page
                           ? 'bg-blue-600 text-white shadow-md shadow-blue-200'
                           : 'bg-white border border-gray-200 text-gray-600 hover:bg-gray-50'
-                      }`}
+                        }`}
                     >
                       {item}
                     </button>
@@ -1390,7 +1350,6 @@ const Attributes = () => {
           </div>
         )}
 
-        {/* Simple count — 1 page */}
         {!loading && attributes.length > 0 && pagination && pagination.total_pages <= 1 && (
           <div className="mt-4 sm:mt-6 text-center text-sm text-gray-500">
             Showing all {pagination.total} {activeTab === 'deleted' ? 'deleted' : 'active'} attributes
